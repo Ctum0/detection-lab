@@ -11,9 +11,26 @@ cd detection-lab
 
 ## Layout
 
-- `detections/` — detection rules (Sigma, Splunk, KQL, etc.)
-- `lab/` — lab setup notes (Sysmon config, log sources)
-- `notes/` — research notes and writeups
+```text
+.
+├── README.md
+├── detections/
+│   ├── sigma/
+│   ├── wazuh/
+│   └── splunk/
+├── docs/
+│   ├── architecture.md
+│   ├── vm-inventory.md
+│   └── detections/          ← one doc per detection
+├── attack-tests/            ← scenario scripts per test
+└── .github/workflows/       ← CI later
+```
+
+- `detections/sigma/` — vendor-agnostic Sigma rules (source of truth)
+- `detections/wazuh/` — Wazuh conversions
+- `detections/splunk/` — Splunk SPL conversions
+- `docs/` — architecture, VM inventory, per-detection docs
+- `attack-tests/` — validation scenarios
 
 ## Author
 
