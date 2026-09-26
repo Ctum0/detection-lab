@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Detection ID | DET-006 |
-| Rule | Sigma: `detections/sigma/scheduled_task_creation.yml` |
+| Rule | Sigma `detections/sigma/scheduled_task_creation.yml`; Wazuh 100006 (chains stock 60228); SPL `detections/splunk/scheduled_task_creation.spl` |
 | Data source | Windows Security log, Event ID 4698, via Wazuh agent |
 | ATT&CK | T1053.005 — Scheduled Task |
 | Severity | Medium |

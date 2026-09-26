@@ -1,0 +1,66 @@
+# Known limitations
+
+## L-001: auditd EXECVE telemetry not reaching Wazuh (open)
+
+Blocks validation of DET-008 (SUID, rule 100010) and DET-009 (reverse
+shell, rule 100001). Both rules exist in Sigma, Wazuh XML and SPL, but no
+auditd EXECVE events have been observed in the manager, so neither custom
+rule can fire.
+
+### Symptoms
+
+- `chmod u+s` / loopback reverse-shell tests on `linux-victim` produce no
+  `auditd`-sourced alerts in Threat Hunting / Discover.
+- Rules 100001/100010 never fire; no `audit.command` / `audit.args` fields
+  seen on any event.
+- Windows (Sysmon/Security/System) and auth.log (sshd) pipelines are
+  healthy — the gap is specific to the auditd path.
+
+### Troubleshooting performed
+
+1. **auditctl persistence** — rules added with `auditctl` worked until
+   reboot, then vanished. Rules were moved to `/etc/audit/rules.d/*.rules`
+   so they persist; reloaded and re-verified with `auditctl -l`.
+2. **augenrules** — ran `augenrules --load` to compile
+   `/etc/audit/rules.d/` into `/etc/audit/audit.rules` and restarted
+   `auditd`; `ausearch` locally confirms EXECVE records are generated on
+   the victim itself (generation works, forwarding doesn't).
+3. **af_unix plugin path** — investigated the audisp `af_unix` plugin
+   (forwards audit events over a unix socket to the Wazuh agent). Plugin
+   present but events still not surfacing as decoded `audit.*` fields.
+4. **localfile fallback** — tried reading `/var/log/audit/audit.log`
+   directly via a `<localfile>` block on the agent; multiline EXECVE
+   records arrive but don't decode into `audit.command`/`audit.args`,
+   so rules 100001/100010 (written against decoded fields) still miss.
+
+### Root-cause hypothesis (unconfirmed)
+
+The manager-side audit decoders (parent 80700, `audit.command` /
+`audit.args`) expect the agent's native audit reader format, while the
+agent is either (a) not enrolled in audit collection at all (missing /
+disabled audit integration in `agent.conf` / `ossec.conf`), or (b)
+shipping raw `audit.log` lines via syslog/localfile that match a generic
+decoder instead of the audit decoder. The `ausearch`-works-locally result
+points at collection/forwarding, not at auditd itself. Confirm with
+`wazuh-logtest` feeding a raw EXECVE line and checking which decoder
+(and rule parent) it hits.
+
+### Workaround options
+
+1. **Short term:** validate DET-008/009 logic off-box — run the Sigma→SPL
+   queries manually in Splunk against imported `ausearch` output, and
+   record results in the det docs without flipping to VALIDATED.
+2. **Medium term:** fix the pipeline — enable the agent audit reader (or a
+   dedicated `<localfile>` with JSON output via `audisp-json`/`ausearch
+   --format json` piped to a file the agent tails), then confirm
+   `audit.command` fields appear before re-testing rules 100001/100010.
+3. **Alternative:** rewrite rules 100001/100010 against `full_log` PCRE2
+   `<match>` (decoder-independent) if decoded fields prove unreliable —
+   the converter already supports this pattern for sshd.
+
+### Next steps
+
+- [ ] `wazuh-logtest` with a captured EXECVE record → identify decoding path (Sithum)
+- [ ] Decide: native audit reader vs localfile+JSON (Sithum)
+- [ ] Re-run DET-008/DET-009 validation attacks once fields land (Sithum)
+- [ ] Flip matrix + det-doc statuses to VALIDATED with evidence filenames

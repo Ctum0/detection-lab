@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Detection ID | DET-002 |
-| Rule | Sigma: `detections/sigma/powershell_encoded_command.yml` |
+| Rule | Sigma `detections/sigma/powershell_encoded_command.yml`; Wazuh 100005; SPL `detections/splunk/powershell_encoded_command.spl` |
 | Data source | Sysmon process_creation (SwiftOnSecurity config) via Wazuh agent |
 | ATT&CK | T1059.001 — PowerShell |
 | Severity | High |

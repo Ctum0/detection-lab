@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Detection ID | DET-008 |
-| Rule | Sigma: `detections/sigma/suid_privilege_escalation.yml` |
+| Rule | Sigma `detections/sigma/suid_privilege_escalation.yml`; Wazuh 100010; SPL `detections/splunk/suid_privilege_escalation.spl` |
 | Data source | Linux auditd EXECVE via Wazuh agent |
 | ATT&CK | T1548.001 — Setuid and Setgid |
 | Severity | Medium |

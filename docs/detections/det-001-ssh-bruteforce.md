@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Detection ID | DET-001 |
-| Rule | Wazuh 5712 |
+| Rule | Wazuh 5712 (stock); custom 100008 (base) + 100009 (freq 6/10m); Sigma `detections/sigma/ssh_bruteforce.yml`; SPL `detections/splunk/ssh_bruteforce.spl` |
 | Data source | /var/log/auth.log (sshd) via Wazuh agent |
 | ATT&CK | T1110.001 — Password Guessing |
 | Severity | Level 10 |

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Detection ID | DET-009 |
-| Rule | Sigma: `detections/sigma/linux_reverse_shell.yml` |
+| Rule | Sigma `detections/sigma/linux_reverse_shell.yml`; Wazuh 100001; SPL `detections/splunk/linux_reverse_shell.spl` |
 | Data source | Linux auditd EXECVE via Wazuh agent |
 | ATT&CK | T1059.004 — Unix Shell |
 | Severity | High |

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Detection ID | DET-007 |
-| Rule | Sigma: `detections/sigma/suspicious_service_creation.yml` |
+| Rule | Sigma `detections/sigma/suspicious_service_creation.yml`; Wazuh 100011; SPL `detections/splunk/suspicious_service_creation.spl` |
 | Data source | Windows System log, Event ID 7045, via Wazuh agent |
 | ATT&CK | T1543.003 — Windows Service |
 | Severity | High |

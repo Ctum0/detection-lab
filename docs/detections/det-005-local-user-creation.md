@@ -3,11 +3,11 @@
 | Field | Value |
 |---|---|
 | Detection ID | DET-005 |
-| Rule | Sigma: `detections/sigma/local_user_creation.yml` |
+| Rule | Sigma `detections/sigma/local_user_creation.yml`; Wazuh 100002; SPL `detections/splunk/local_user_creation.spl` |
 | Data source | Windows Security log, Event ID 4720, via Wazuh agent |
 | ATT&CK | T1136.001 — Local Account |
 | Severity | Medium |
-| Status | UNTESTED |
+| Status | VALIDATED 2026-09-27 |
 
 ## Logic
 
@@ -20,6 +20,14 @@ Security EID 4720 with `TargetUserName`, `TargetDomainName` (host), and `Subject
 ## Validation method
 
 Run `net user labtest P@ssw0rd! /add` on the victim; confirm 4720 ships and the rule fires, with `SubjectUserName` matching the operator.
+
+Validated 2026-09-27: ran `net user backdoor P@ssw0rd123 /add` on
+windows-victim (`DESKTOP-2R9UM3Q`) — command completed successfully, and
+Wazuh fired 60109 `User account enabled or created` plus EID 4722
+`A user account was enabled` (Target `backdoor`, Subject `ctum`).
+Evidence: `evidence/det005-net-user-backdoor.png`,
+`evidence/det005-user-created-alerts.png`,
+`evidence/det005-eid4722-drilldown.png`.
 
 ## FP notes
 

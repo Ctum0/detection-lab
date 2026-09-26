@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Detection ID | DET-003 |
-| Rule | Sigma: `detections/sigma/powershell_download_cradle.yml` |
+| Rule | Sigma `detections/sigma/powershell_download_cradle.yml`; Wazuh 100004; SPL `detections/splunk/powershell_download_cradle.spl` |
 | Data source | Sysmon process_creation (SwiftOnSecurity config) via Wazuh agent |
 | ATT&CK | T1059.001 — PowerShell |
 | Severity | High |

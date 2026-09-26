@@ -73,9 +73,9 @@
     </mitre>
   </rule>
 
-  <!-- Scheduled Task Creation | T1053.005 | Windows Security 4698 -->
+  <!-- Scheduled Task Creation | T1053.005 | Windows Security 4698 (decodes under built-in 60228) -->
   <rule id="100006" level="7">
-    <if_sid>60604</if_sid>
+    <if_sid>60228</if_sid>
     <field name="win.system.eventID">^4698$</field>
     <description>CTUM: Scheduled task created (4698) [T1053.005]</description>
     <mitre>

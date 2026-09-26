@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Detection ID | DET-004 |
-| Rule | Sigma: `detections/sigma/lsass_credential_dumping.yml` |
+| Rule | Sigma `detections/sigma/lsass_credential_dumping.yml`; Wazuh 100003; SPL `detections/splunk/lsass_credential_dumping.spl` |
 | Data source | Sysmon Event ID 10 (process_access) via Wazuh agent |
 | ATT&CK | T1003.001 — LSASS Memory |
 | Severity | Critical |
