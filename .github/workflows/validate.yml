@@ -1,23 +1,23 @@
 on:
-push:
-paths:
-- 'detections/sigma/**'
-pull_request:
-paths:
-- 'detections/sigma/**'
+  push:
+    paths:
+      - 'detections/sigma/**'
+  pull_request:
+    paths:
+      - 'detections/sigma/**'
 
 jobs:
-sigma-check:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout
-uses: actions/checkout@v4
+  sigma-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-- name: Install sigma-cli
-run: |
-pipx install sigma-cli
-pipx inject sigma-cli pysigma-backend-splunk
+      - name: Install sigma-cli
+        run: |
+          pipx install sigma-cli
+          pipx inject sigma-cli pysigma-backend-splunk
 
-- name: Validate rules
-run: |
-sigma check detections/sigma/
+      - name: Validate rules
+        run: |
+          sigma check detections/sigma/
