@@ -1,0 +1,43 @@
+title: Windows Service Creation by Suspicious Path
+id: f1a19d4b-0ed2-48c7-a9de-483dd2091711
+status: test
+description: >
+  Detects new service installation (System event 7045) whose ImagePath points
+  at a suspicious location or interpreter: temp directories, public folders,
+  ProgramData, or PowerShell/cmd/script hosts in the path. Services give
+  SYSTEM-level persistence, so a service binary living outside Program Files
+  or Windows is highly suspicious. Expected behavior: alert on 7045 events
+  matching these path patterns for immediate triage.
+references:
+  - https://attack.mitre.org/techniques/T1543/003/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1543.003
+  - attack.ta0003
+  - attack.ta0004
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    EventID: 7045
+  selection_susp_path:
+    ImagePath|contains:
+      - '\Temp\'
+      - '\Temporary Internet Files\'
+      - '\Users\Public\'
+      - '\ProgramData\'
+      - '\AppData\'
+      - 'powershell'
+      - 'pwsh'
+      - 'cmd.exe'
+      - '.ps1'
+      - '.vbs'
+      - '.js'
+      - '.hta'
+  condition: selection and selection_susp_path
+falsepositives:
+  - Legitimate third-party agents installing from ProgramData or AppData
+  - Developer tooling registering services from user profiles
+level: high

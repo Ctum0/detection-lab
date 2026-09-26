@@ -1,0 +1,33 @@
+title: PowerShell Encoded Command Execution
+id: ecc2ba29-bb64-4c5c-b610-70c5ec9d3b64
+status: test
+description: >
+  Detects PowerShell executing with an obfuscated payload via -EncodedCommand
+  (or its short form -enc). Adversaries Base64-encode commands to evade
+  string-based detections and hide malicious logic. Expected behavior: any
+  powershell.exe process_creation whose CommandLine carries an encoded-command
+  flag raises a high-severity alert for analyst review.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1059.001
+  - attack.ta0002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_cli:
+    CommandLine|contains:
+      - '-EncodedCommand'
+      - '-enc'
+  condition: selection_img and selection_cli
+falsepositives:
+  - Legitimate automation (SCCM, Intune, admin scripts) passing encoded commands
+  - Software installers bootstrapping via encoded PowerShell
+level: high

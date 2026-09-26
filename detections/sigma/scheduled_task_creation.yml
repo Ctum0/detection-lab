@@ -1,0 +1,29 @@
+title: Scheduled Task Creation
+id: b0a71bef-ab8a-4240-ac9c-ac578f485925
+status: test
+description: >
+  Detects scheduled-task creation via Windows Security event 4698. Scheduled
+  tasks are a classic persistence and privilege-escalation mechanism, often
+  paired with XML payloads that launch encoded PowerShell at logon or on a
+  schedule. Expected behavior: alert on every 4698 and verify the task
+  action, author and trigger against authorised change records.
+references:
+  - https://attack.mitre.org/techniques/T1053/005/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1053.005
+  - attack.ta0002
+  - attack.ta0003
+  - attack.ta0004
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4698
+  condition: selection
+falsepositives:
+  - Legitimate admin and application task registrations
+  - Software updaters and backup agents creating tasks
+level: medium

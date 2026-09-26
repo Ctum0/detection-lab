@@ -36,7 +36,7 @@ author: Sithum
 date: 2026-09-26
 tags:
   - attack.t1110.001
-  - attack.credential_access
+  - attack.ta0006
 correlation:
   type: event_count
   rules:

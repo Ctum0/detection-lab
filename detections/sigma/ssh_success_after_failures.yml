@@ -1,0 +1,83 @@
+title: SSH Failed Authentication Event
+id: 64a43cb4-f4c4-49b4-a6fd-47284dde61fd
+name: ssh_failed_auth_event
+status: test
+description: >
+  Base rule capturing a single failed SSH authentication (sshd 'Failed
+  password') from auth.log telemetry. Used only as input to the
+  success-after-failures correlation in this file.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1110.001
+  - attack.ta0006
+logsource:
+  product: linux
+  service: auth
+detection:
+  selection:
+    program|contains: 'sshd'
+    message|contains: 'Failed password'
+  condition: selection
+falsepositives:
+  - Users mistyping passwords
+level: informational
+---
+title: SSH Successful Authentication Event
+id: 4ffebc17-0323-4716-a072-16871503042b
+name: ssh_success_auth_event
+status: test
+description: >
+  Base rule capturing a single successful SSH authentication (sshd
+  'Accepted password' / 'Accepted publickey') from auth.log telemetry.
+  Used only as input to the success-after-failures correlation in this file.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1110.001
+  - attack.ta0006
+logsource:
+  product: linux
+  service: auth
+detection:
+  selection:
+    program|contains: 'sshd'
+    message|contains:
+      - 'Accepted password'
+      - 'Accepted publickey'
+  condition: selection
+falsepositives:
+  - Legitimate logins, including retries after a typo
+level: informational
+---
+title: SSH Successful Login After Multiple Failures
+id: 8386e655-5cbf-4762-95aa-d98b92654076
+status: test
+description: >
+  Correlates repeated SSH failures from one source IP followed by a
+  successful login within 15 minutes (temporal_ordered). A success at the
+  end of a guessing burst means the password-guessing attack likely worked
+  and the account is compromised. Expected behavior: immediate incident
+  response — isolate, rotate credentials, review post-login activity.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1110.001
+  - attack.ta0006
+correlation:
+  type: temporal_ordered
+  rules:
+    - ssh_failed_auth_event
+    - ssh_success_auth_event
+  group-by:
+    - src_ip
+  timespan: 15m
+falsepositives:
+  - User failing several times then remembering the password
+level: high

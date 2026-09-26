@@ -1,0 +1,43 @@
+title: Suspicious PowerShell Download Cradle
+id: 3134779a-365c-4393-a78c-a63efe0c22c1
+status: test
+description: >
+  Detects PowerShell download cradles used to fetch and execute remote
+  payloads in memory (DownloadString, DownloadFile, Net.WebClient,
+  Invoke-WebRequest/Invoke-RestMethod, IEX/Invoke-Expression). This is a
+  staple of initial access and execution tradecraft. Expected behavior:
+  alert when powershell.exe or pwsh.exe command lines contain both a
+  download primitive and an execution primitive, or a known cradle pattern.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1059.001
+  - attack.ta0002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_download:
+    CommandLine|contains:
+      - 'DownloadString'
+      - 'DownloadFile'
+      - 'Net.WebClient'
+      - 'Invoke-WebRequest'
+      - 'Invoke-RestMethod'
+      - 'Start-BitsTransfer'
+  selection_exec:
+    CommandLine|contains:
+      - 'Invoke-Expression'
+      - 'IEX('
+      - 'IEX '
+  condition: selection_img and selection_download and selection_exec
+falsepositives:
+  - Admin scripts that download updates or modules then invoke them
+  - Software deployment tooling using WebClient cradles
+level: high

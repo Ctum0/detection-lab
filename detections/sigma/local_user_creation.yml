@@ -1,0 +1,28 @@
+title: New Local User Creation
+id: 09e6ec76-3de6-4ae7-9c57-7f992643b8ec
+status: test
+description: >
+  Detects creation of a local user account via Windows Security event 4720.
+  Adversaries create local accounts to establish persistence on a host. The
+  lab victim is a standalone Win10 Pro box with no AD yet, so any 4720 is
+  a local account event and worth review. Expected behavior: alert on every
+  4720 and have the analyst confirm it maps to authorised admin activity.
+references:
+  - https://attack.mitre.org/techniques/T1136/001/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1136.001
+  - attack.ta0003
+  - attack.ta0004
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4720
+  condition: selection
+falsepositives:
+  - Legitimate administrator creating accounts
+  - Application installers provisioning service accounts
+level: medium
