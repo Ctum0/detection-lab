@@ -25,6 +25,7 @@ cd detection-lab
 │   ├── attack-matrix.md     ← all 11 detections at a glance
 │   ├── evidence.md          ← screenshot index (files in evidence/)
 │   ├── known-limitations.md ← open gaps (e.g. auditd ingestion)
+│   ├── pipeline-demo/       ← DET-012 end-to-end CI/CD screenshots
 │   └── detections/          ← one doc per detection (det-001…det-011)
 ├── evidence/                ← screenshot drops (indexed by docs/evidence.md)
 ├── attack-tests/            ← scenario scripts per test
