@@ -14,7 +14,7 @@ author: Sithum
 date: 2026-09-26
 tags:
   - attack.t1059.001
-  - attack.ta0002
+  - attack.execution
 logsource:
   category: process_creation
   product: windows

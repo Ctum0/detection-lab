@@ -12,7 +12,7 @@ author: Sithum
 date: 2026-09-26
 tags:
   - attack.t1110.001
-  - attack.ta0006
+  - attack.credential-access
 logsource:
   product: linux
   service: auth
@@ -39,7 +39,7 @@ author: Sithum
 date: 2026-09-26
 tags:
   - attack.t1110.001
-  - attack.ta0006
+  - attack.credential-access
 logsource:
   product: linux
   service: auth
@@ -69,7 +69,7 @@ author: Sithum
 date: 2026-09-26
 tags:
   - attack.t1110.001
-  - attack.ta0006
+  - attack.credential-access
 correlation:
   type: temporal_ordered
   rules:

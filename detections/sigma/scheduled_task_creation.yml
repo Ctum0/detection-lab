@@ -13,9 +13,9 @@ author: Sithum
 date: 2026-09-26
 tags:
   - attack.t1053.005
-  - attack.ta0002
-  - attack.ta0003
-  - attack.ta0004
+  - attack.execution
+  - attack.persistence
+  - attack.privilege-escalation
 logsource:
   product: windows
   service: security

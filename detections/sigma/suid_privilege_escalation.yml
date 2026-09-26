@@ -13,8 +13,8 @@ author: Sithum
 date: 2026-09-26
 tags:
   - attack.t1548.001
-  - attack.ta0004
-  - attack.ta0005
+  - attack.privilege-escalation
+  - attack.defense-impairment
 logsource:
   product: linux
   service: auditd

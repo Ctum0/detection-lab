@@ -8,12 +8,12 @@ description: >
   behavior: alert on every 1102 and treat as a potential compromise
   indicator until proven to be authorised maintenance.
 references:
-  - https://attack.mitre.org/techniques/T1070/001/
+  - https://attack.mitre.org/techniques/T1685/005/
 author: Sithum
 date: 2026-09-26
 tags:
-  - attack.t1070.001
-  - attack.ta0005
+  - attack.t1685.005
+  - attack.defense-impairment
 logsource:
   product: windows
   service: security
