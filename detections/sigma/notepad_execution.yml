@@ -1,0 +1,23 @@
+title: Notepad Execution
+id: a05686cc-4e03-4ead-8821-99a9dc685d67
+status: test
+description: >
+  Detects execution of notepad.exe. CI/CD pipeline test detection:
+  trivially triggerable, used to prove the full Sigma-to-Wazuh
+  deployment loop works end to end.
+references:
+  - https://attack.mitre.org/techniques/T1098/
+author: Sithum
+date: 2026-09-27
+tags:
+  - attack.execution
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\\notepad.exe'
+  condition: selection
+falsepositives:
+  - Users opening text files
+level: low

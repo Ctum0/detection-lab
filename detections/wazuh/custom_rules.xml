@@ -115,4 +115,13 @@
     </mitre>
   </rule>
 
+
+  <rule id="100012" level="3">
+    <if_group>sysmon_event1</if_group>
+    <field name="win.eventdata.image" type="pcre2">(?i)\\notepad\.exe$</field>
+    <description>CTUM: Notepad execution - CI/CD pipeline test [T1098]</description>
+    <mitre>
+      <id>T1098</id>
+    </mitre>
+  </rule>
 </group>
