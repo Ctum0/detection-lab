@@ -52,7 +52,7 @@ Sigma is the source of truth:
 ## Metrics
 
 - **Detections:** 11 (DET-001…DET-011) across 9 ATT&CK techniques — see `docs/attack-matrix.md`
-- **Validated:** 2/11 (DET-001 SSH brute force, DET-005 local user creation)
+- **Validated:** 4/11 (DET-001 SSH brute force, DET-002 encoded PowerShell, DET-005 local user, DET-006 scheduled task)
 - **Sigma rules:** 11 files in `detections/sigma/` (spec v2.1, `sigma check` clean)
 - **Wazuh rules:** 11 custom rules, IDs 100001–100011, in `detections/wazuh/custom_rules.xml`
 - **Splunk SPL:** 10 auto-generated searches in `detections/splunk/` (DET-010 excluded — temporal correlation)

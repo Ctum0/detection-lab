@@ -22,6 +22,13 @@ terminal doing the thing; **SIEM** = Wazuh alert/event view proving detection.
 | `evidence/det001-hydra-attack.png` | `Screenshot_20260926_195548.png` | Parrot terminal running `hydra -l nonexistentuser -P rockyou.txt -t 4 192.168.1.112 ssh` (14M+ login tries queued) over a Wazuh events table streaming rule 5710 `sshd: Attempt to login using a non-existent user` | Attack view (+ SIEM context in background) |
 | `evidence/det001-rule5712-bruteforce.png` | `Screenshot_20260926_200001.png` | Discover view: hydra at 76 tries/min over MPs; event table shows the 5710 stream **and** rule 5712 `sshd: brute force trying to get access to the system. Non existent user.` firing at 19:59:46 | SIEM view — the brute-force correlation firing |
 
+## DET-002 — PowerShell Encoded Command (VALIDATED)
+
+| Suggested file | Source | Shows | Story fit |
+|---|---|---|---|
+| `evidence/det002-rule100005-encoded.png` | `Screenshot_20260927_031425.png` | windows-victim event: custom rule 100005 `CTUM: PowerShell with encoded command [T1059.001]`, level 10, at 03:13 — first custom Sysmon rule firing in the lab | SIEM view |
+| Still to capture: `evidence/det002-encoded-attack.png` | — | The `powershell -enc …` run on windows-victim that produced it | Attack view — missing |
+
 ## DET-004 — LSASS Credential Dumping (stock rule observed)
 
 | Suggested file | Source | Shows | Story fit |
@@ -38,11 +45,12 @@ terminal doing the thing; **SIEM** = Wazuh alert/event view proving detection.
 | `evidence/det005-user-created-alerts.png` | `Screenshot_20260927_005437.png` | windows-victim events: 60109 `User account enabled or created`, 60110 `User account changed`, plus 92039 net.exe / 92033 PowerShell discovery hits | SIEM view |
 | `evidence/det005-eid4722-drilldown.png` | `Screenshot_20260927_005642.png` | Document Details drill-down: EID 4722 `A user account was enabled`, Target `backdoor`, Subject `ctum` on `DESKTOP-2R9UM3Q` | SIEM view — field-level proof for the writeup |
 
-## DET-006 — Scheduled Task Creation
+## DET-006 — Scheduled Task Creation (VALIDATED)
 
 | Suggested file | Source | Shows | Story fit |
 |---|---|---|---|
-| `evidence/det006-scheduled-task-60228.png` | `Screenshot_20260927_015819.png` | windows-victim events: `A scheduled task was created` (rule 60228) at 01:57 | SIEM view |
+| `evidence/det006-rule100006-task.png` | `Screenshot_20260927_031700.png` | windows-victim event: custom rule 100006 `CTUM: Scheduled task created (4698) [T1053.005]`, level 7, at 03:16 — plus `Wazuh server started` (rule deploy restart) right above it | SIEM view |
+| `evidence/det006-scheduled-task-60228.png` | `Screenshot_20260927_015819.png` | windows-victim events: stock `A scheduled task was created` (rule 60228) at 01:57 — the parent event custom 100006 chains off | SIEM view — supporting |
 | Still to capture: `evidence/det006-schtasks-attack.png` | — | `schtasks /create /tn LabTest …` run on windows-victim | Attack view — missing |
 
 ## Supporting (no DET yet)
@@ -55,7 +63,7 @@ terminal doing the thing; **SIEM** = Wazuh alert/event view proving detection.
 
 | Suggested file | DET | What to grab (attack + SIEM) |
 |---|---|---|
-| `evidence/det002-encoded-attack.png` / `evidence/det002-sysmon-eid1.png` | DET-002 | `powershell -enc …` run + Sysmon EID 1 with encoded CommandLine |
+| `evidence/det002-encoded-attack.png` | DET-002 | `powershell -enc …` run (SIEM side captured 2026-09-27, rule 100005 firing) |
 | `evidence/det003-cradle-attack.png` / `evidence/det003-cradle-eid1.png` | DET-003 | DownloadString+IEX cradle run + EID 1 showing full cradle |
 | `evidence/det007-sc-create-attack.png` / `evidence/det007-7045-alert.png` | DET-007 | `sc create LabSvc binPath= C:\Temp\…` + EID 7045 with suspicious ImagePath |
 | `evidence/det008-chmod-suid-attack.png` / `evidence/det008-auditd-execve.png` | DET-008 | `chmod u+s /tmp/lab_suid` + auditd EXECVE record |

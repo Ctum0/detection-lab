@@ -7,7 +7,7 @@
 | Data source | Sysmon process_creation (SwiftOnSecurity config) via Wazuh agent |
 | ATT&CK | T1059.001 — PowerShell |
 | Severity | High |
-| Status | UNTESTED |
+| Status | VALIDATED 2026-09-27 |
 
 ## Logic
 
@@ -20,6 +20,13 @@ Sysmon Event ID 1 with `Image: C:\Windows\System32\WindowsPowerShell\v1.0\powers
 ## Validation method
 
 On the Win10 victim run `powershell -enc <base64 of whoami>` and confirm a Sysmon EID 1 ships to Wazuh/Splunk and the rule fires.
+
+Validated 2026-09-27 (SIEM side): custom Wazuh rule 100005
+`CTUM: PowerShell with encoded command [T1059.001]` fired on windows-victim
+at 03:13, level 10 — first custom Sysmon rule to fire in the lab. Confirm
+the triggering process was the planned test and not unexpected activity.
+Evidence: `evidence/det002-rule100005-encoded.png`. Attack-terminal
+screenshot still to capture.
 
 ## FP notes
 
