@@ -1,0 +1,501 @@
+#!/usr/bin/env python3
+"""Sigma -> Wazuh XML converter for the CTUM detection-lab.
+
+Converts detections/sigma/*.yml into a single Wazuh custom rules file
+(detections/wazuh/custom_rules.xml) with stable IDs starting at 100001.
+
+Approach adapted from Alanv0303/Rule-converter (MIT): parse multi-doc
+Sigma YAML, translate selections into Wazuh <field>/<match> checks, emit
+one XML <rule> per convertible doc. Extended here with CTUM repo rules:
+per-logsource anchoring (if_sid/if_group + groups), Sigma->Wazuh field
+mapping, MITRE blocks, event_count correlations via frequency/timeframe,
+and an ID-mapping header comment.
+
+Usage:
+  python3 converters/sigma_to_wazuh.py
+  python3 converters/sigma_to_wazuh.py --sigma-dir detections/sigma \\
+      --output detections/wazuh/custom_rules.xml --start-id 100001
+  python3 converters/sigma_to_wazuh.py --anchor if_group   # Wazuh 4.9.0+
+
+Requirements: python3 + pyyaml. No sigma-cli needed.
+
+Limitations (review before deploying to production):
+- Sigma is more expressive than Wazuh rules; output is a tested starting
+  point, not a 1:1 translation. Validate with wazuh-logtest.
+- temporal/temporal_ordered correlations have no Wazuh equivalent and are
+  SKIPPED (ssh_success_after_failures.yml).
+- Wazuh <field> checks AND together; same-field alternations are folded
+  into one PCRE2 alternation to preserve Sigma OR semantics.
+- Stock parent SIDs (61603 = Sysmon EID 1, 61612 = Sysmon EID 10, from
+  wazuh-ruleset 0595-win-sysmon_rules.xml) are assumed. On Wazuh 4.9.0+,
+  if_sid chaining off level-0 sysmon parents silently fails at runtime
+  (wazuh/wazuh#36029) -- use --anchor if_group there.
+"""
+
+import argparse
+import datetime
+import re
+import sys
+from pathlib import Path
+from xml.dom import minidom
+
+import yaml
+import xml.etree.ElementTree as ET
+
+# --------------------------------------------------------------------------
+# Static mapping tables
+# --------------------------------------------------------------------------
+
+# Sigma field -> Wazuh decoded field (windows_eventchannel decoder).
+FIELD_MAP = {
+    "Image": "win.eventdata.image",
+    "CommandLine": "win.eventdata.commandLine",
+    "ParentImage": "win.eventdata.parentImage",
+    "TargetImage": "win.eventdata.targetImage",
+    "SourceImage": "win.eventdata.sourceImage",
+    "GrantedAccess": "win.eventdata.grantedAccess",
+    "TargetFilename": "win.eventdata.targetFilename",
+    "ImagePath": "win.eventdata.imagePath",
+    "ServiceName": "win.eventdata.serviceName",
+    "DestinationIp": "win.eventdata.destinationIp",
+    "EventID": "win.system.eventID",
+}
+
+# Stock Wazuh sysmon parents (0595-win-sysmon_rules.xml, 4.x ruleset).
+SYSMON_PARENTS = {
+    1: {"sid": "61603", "group": "sysmon_event1"},
+    10: {"sid": "61612", "group": "sysmon_event_10"},
+}
+
+SIGMA_LEVEL_TO_WAZUH = {
+    "informational": 5,
+    "low": 5,
+    "medium": 7,
+    "high": 10,
+    "critical": 12,
+}
+
+# Technique -> (tactic, technique display name) for the <mitre> block.
+# Tactic is resolved from the rule's own tags first (tactic_of); this table
+# is the fallback. NOTE: MITRE restructured log-clearing in 2026 -- the old
+# T1070.001 (Indicator Removal) is now T1685.005 (Disable or Modify Tools)
+# under the current tactic "Defense Impairment" (verified live 2026-09-26).
+MITRE = {
+    "T1059.001": ("Execution", "PowerShell"),
+    "T1059.004": ("Execution", "Unix Shell"),
+    "T1003.001": ("Credential Access", "LSASS Memory"),
+    "T1136.001": ("Persistence", "Local Account"),
+    "T1053.005": ("Persistence", "Scheduled Task"),
+    "T1543.003": ("Persistence", "Windows Service"),
+    "T1548.001": ("Privilege Escalation", "Setuid and Setgid"),
+    "T1110.001": ("Credential Access", "Password Guessing"),
+    "T1685.005": ("Defense Impairment", "Clear Windows Event Logs"),
+    "T1070.001": ("Defense Evasion", "Clear Windows Event Logs"),  # legacy ID
+}
+
+# Tactic display names, keyed by TA-ID and by shortname. Shortnames follow
+# current MITRE (e.g. defense-impairment); legacy taXXXX IDs kept working.
+TACTIC_DISPLAY = {
+    "ta0001": "Reconnaissance",
+    "ta0002": "Execution",
+    "ta0003": "Persistence",
+    "ta0004": "Privilege Escalation",
+    "ta0005": "Defense Evasion",
+    "ta0006": "Credential Access",
+    "ta0007": "Discovery",
+    "ta0008": "Lateral Movement",
+    "ta0009": "Collection",
+    "ta0010": "Exfiltration",
+    "ta0011": "Command and Control",
+    "ta0040": "Impact",
+    "ta0042": "Resource Development",
+    "ta0043": "Reconnaissance",
+    "reconnaissance": "Reconnaissance",
+    "resource-development": "Resource Development",
+    "initial-access": "Initial Access",
+    "execution": "Execution",
+    "persistence": "Persistence",
+    "privilege-escalation": "Privilege Escalation",
+    "defense-evasion": "Defense Evasion",
+    "defense-impairment": "Defense Impairment",
+    "credential-access": "Credential Access",
+    "discovery": "Discovery",
+    "lateral-movement": "Lateral Movement",
+    "collection": "Collection",
+    "exfiltration": "Exfiltration",
+    "command-and-control": "Command and Control",
+    "impact": "Impact",
+}
+
+SKIP_FILES = {
+    # temporal_ordered has no Wazuh frequency/timeframe equivalent.
+    "ssh_success_after_failures.yml": "temporal_ordered correlation unsupported by Wazuh",
+}
+
+
+# --------------------------------------------------------------------------
+# Helpers
+# --------------------------------------------------------------------------
+
+def technique_of(doc):
+    for tag in doc.get("tags", []):
+        m = re.fullmatch(r"attack\.(t\d{4}\.\d{3})", str(tag))
+        if m:
+            return "T" + m.group(1)[1:].upper()
+    for tag in doc.get("tags", []):
+        m = re.fullmatch(r"attack\.(t\d{4})", str(tag))
+        if m:
+            return "T" + m.group(1)[1:].upper()
+    return "Unknown"
+
+
+def tactic_of(doc, technique):
+    """Resolve tactic display name from the rule's own tags first, so MITRE
+    restructures (e.g. Defense Evasion -> Defense Impairment) flow through
+    without code changes. Falls back to the static MITRE table."""
+    for tag in doc.get("tags", []):
+        t = str(tag)
+        if not t.startswith("attack."):
+            continue
+        key = t[len("attack"):].lower().replace("_", "-")
+        if key in TACTIC_DISPLAY:
+            return TACTIC_DISPLAY[key]
+    return MITRE.get(technique, ("Unknown", technique))[0]
+
+
+def technique_name(technique):
+    return MITRE.get(technique, (None, technique))[1]
+
+
+def split_field_op(key):
+    """'Image|endswith' -> ('Image', 'endswith'); 'EventID' -> ('EventID', None)."""
+    if "|" in key:
+        field, _, op = key.partition("|")
+        return field, op
+    return key, None
+
+
+def pcre2_alt(values, prefix="", suffix=""):
+    """Fold alternation into one case-insensitive PCRE2 pattern."""
+    inner = "|".join(re.escape(str(v)) for v in values)
+    return f"(?i){prefix}(?:{inner}){suffix}"
+
+
+def contains_pattern(values):
+    # Wazuh <field> is already substring matching, but an explicit PCRE2
+    # alternation is unambiguous and matches stock custom-rule style.
+    return pcre2_alt(values, prefix=".*", suffix=".*")
+
+
+def endswith_pattern(values):
+    return pcre2_alt(values, suffix="$")
+
+
+def exact_pattern(values):
+    return pcre2_alt(values, prefix="^", suffix="$")
+
+
+def add_field(rule_el, wazuh_field, pattern, use_regex=True):
+    f = ET.SubElement(rule_el, "field")
+    f.set("name", wazuh_field)
+    if use_regex:
+        f.set("type", "pcre2")
+    f.text = pattern
+    return f
+
+
+def add_mitre(rule_el, doc, technique):
+    m = ET.SubElement(rule_el, "mitre")
+    ET.SubElement(m, "id").text = technique
+    ET.SubElement(m, "tactic").text = tactic_of(doc, technique)
+    ET.SubElement(m, "technique").text = technique_name(technique)
+
+
+def finish_rule(rule_el, doc, technique):
+    desc = ET.SubElement(rule_el, "description")
+    desc.text = f"{doc.get('title', 'Sigma detection')} [{technique}]"
+    add_mitre(rule_el, doc, technique)
+
+
+def parse_timespan(span):
+    m = re.fullmatch(r"(\d+)\s*([smhd])", str(span).strip())
+    if not m:
+        raise ValueError(f"Cannot parse timespan: {span!r}")
+    return int(m.group(1)) * {"s": 1, "m": 60, "h": 3600, "d": 86400}[m.group(2)]
+
+
+# --------------------------------------------------------------------------
+# Per-logsource translators. Each returns True if it emitted the rule body.
+# --------------------------------------------------------------------------
+
+def translate_windows(rule_el, doc, anchor):
+    """Sysmon + Windows Security/System channel rules -> win.* fields."""
+    logsource = doc.get("logsource", {})
+    detection = doc.get("detection", {})
+    category = logsource.get("category")
+    service = logsource.get("service")
+
+    if category in ("process_creation", "process_access"):
+        event_id = None
+        for sel in detection.values():
+            if isinstance(sel, dict) and "EventID" in sel:
+                event_id = sel["EventID"]
+        event_id = event_id or (1 if category == "process_creation" else 10)
+        parent = SYSMON_PARENTS[event_id]
+        anchor_el = ET.SubElement(
+            rule_el, "if_sid" if anchor == "if_sid" else "if_group"
+        )
+        anchor_el.text = parent["sid"] if anchor == "if_sid" else parent["group"]
+        grp = ET.SubElement(rule_el, "group")
+        grp.text = f"{parent['group']},"
+    elif service in ("security", "system"):
+        channel = "Security" if service == "security" else "System"
+        add_field(rule_el, "win.system.channel", f"^{channel}$", use_regex=False)
+        grp = ET.SubElement(rule_el, "group")
+        grp.text = (
+            "windows_security," if service == "security" else "windows_system,"
+        )
+    else:
+        return False
+
+    for sel_name, sel in detection.items():
+        if sel_name == "condition" or not isinstance(sel, dict):
+            continue
+        for key, value in sel.items():
+            field, op = split_field_op(key)
+            if field not in FIELD_MAP:
+                continue
+            values = value if isinstance(value, list) else [value]
+            wfield = FIELD_MAP[field]
+            if field == "EventID":
+                add_field(rule_el, wfield, f"^{values[0]}$", use_regex=False)
+            elif op == "endswith":
+                add_field(rule_el, wfield, endswith_pattern(values))
+            elif op in ("contains", None) and field != "GrantedAccess":
+                add_field(rule_el, wfield, contains_pattern(values))
+            else:  # GrantedAccess and friends: exact-mask semantics.
+                add_field(rule_el, wfield, exact_pattern(values))
+    return True
+
+
+def translate_sshd(rule_el, doc):
+    """auth.log sshd lines -> full_log PCRE2 match (decoder-independent)."""
+    detection = doc.get("detection", {})
+    needles = []
+    for sel in detection.values():
+        if isinstance(sel, list):
+            # Bare-string list form (e.g. selection: ['Failed password']).
+            needles.extend(str(v) for v in sel)
+            continue
+        if not isinstance(sel, dict):
+            continue
+        for key, value in sel.items():
+            field, _ = split_field_op(key)
+            if field in ("message",):
+                vals = value if isinstance(value, list) else [value]
+                needles.extend(vals)
+    if not needles:
+        return False
+    m = ET.SubElement(rule_el, "match")
+    m.set("type", "pcre2")
+    m.text = "(?i)sshd\\[\\d+\\]: (?:{})".format(
+        "|".join(re.escape(str(n)) for n in needles)
+    )
+    grp = ET.SubElement(rule_el, "group")
+    grp.text = "syslog,sshd,"
+    return True
+
+
+def translate_auditd(rule_el, doc):
+    """auditd EXECVE -> full_log PCRE2 match over exe + argv patterns."""
+    detection = doc.get("detection", {})
+    exes, args = [], []
+    for sel in detection.values():
+        if not isinstance(sel, dict):
+            continue
+        for key, value in sel.items():
+            field, op = split_field_op(key)
+            vals = value if isinstance(value, list) else [value]
+            if field == "exe":
+                exes.extend(str(v).split("/")[-1] for v in vals)
+            elif field in ("type",):
+                continue
+            elif field.startswith("a"):
+                args.extend(vals)
+    if not exes:
+        return False
+    m = ET.SubElement(rule_el, "match")
+    m.set("type", "pcre2")
+    exe_pat = "(?:{})".format(
+        "|".join(re.escape(e) for e in dict.fromkeys(exes))
+    )
+    if args:
+        arg_pat = "|".join(
+            re.escape(str(a)).replace(r"\ ", ".*") for a in dict.fromkeys(args)
+        )
+        # Both the binary and a suspicious argument must appear in the
+        # same EXECVE record; argv order varies so match independently.
+        m.text = f"(?i){exe_pat}.*(?:{arg_pat})"
+    else:
+        m.text = f"(?i){exe_pat}"
+    grp = ET.SubElement(rule_el, "group")
+    grp.text = "auditd,"
+    return True
+
+
+def rule_class(doc):
+    logsource = doc.get("logsource", {})
+    product = logsource.get("product")
+    service = logsource.get("service")
+    category = logsource.get("category")
+    if product == "windows":
+        return "windows"
+    if product == "linux" and service == "auth":
+        return "sshd"
+    if product == "linux" and service == "auditd":
+        return "auditd"
+    if category in ("process_creation", "process_access"):
+        return "windows"
+    return "unknown"
+
+
+# --------------------------------------------------------------------------
+# Main conversion
+# --------------------------------------------------------------------------
+
+def convert(sigma_dir, start_id, anchor):
+    rules_out = []  # (rule_el, pre_comment)
+    mapping = []    # (rule_id, sigma_file, title) for the header comment
+    skipped = []
+    rule_id = start_id
+
+    for path in sorted(sigma_dir.glob("*.yml")):
+        if path.name in SKIP_FILES:
+            skipped.append((path.name, SKIP_FILES[path.name]))
+            continue
+        docs = [d for d in yaml.safe_load_all(path.read_text()) if d]
+        pending_base_id = {}
+        for doc in docs:
+            title = doc.get("title", path.stem)
+            technique = technique_of(doc)
+            level = SIGMA_LEVEL_TO_WAZUH.get(str(doc.get("level", "")).lower(), 7)
+
+            if "correlation" in doc:
+                corr = doc["correlation"]
+                ctype = corr.get("type")
+                if ctype == "event_count":
+                    base_name = (corr.get("rules") or [None])[0]
+                    base_id = pending_base_id.get(base_name)
+                    if base_id is None:
+                        print(
+                            f"WARN: {path.name}: correlation references "
+                            f"unknown base {base_name!r}; skipped",
+                            file=sys.stderr,
+                        )
+                        skipped.append((f"{path.name}#{title}", "unresolved base"))
+                        continue
+                    timespan = parse_timespan(corr.get("timespan", "10m"))
+                    threshold = (corr.get("condition") or {}).get("gte") or (
+                        corr.get("condition") or {}
+                    ).get("gt", 0)
+                    rule_el = ET.Element("rule")
+                    rule_el.set("id", str(rule_id))
+                    rule_el.set("level", str(level))
+                    rule_el.set("frequency", str(int(threshold)))
+                    rule_el.set("timeframe", str(timespan))
+                    ET.SubElement(rule_el, "if_matched_sid").text = str(base_id)
+                    if "src_ip" in (corr.get("group-by") or []):
+                        ET.SubElement(rule_el, "same_source_ip")
+                    grp = ET.SubElement(rule_el, "group")
+                    grp.text = "syslog,sshd,"
+                    finish_rule(rule_el, doc, technique)
+                    rules_out.append((rule_el, f"{title} | {path.name}"))
+                    mapping.append((rule_id, path.name, title))
+                    rule_id += 1
+                else:
+                    skipped.append((f"{path.name}#{title}", f"{ctype} unsupported"))
+                continue
+
+            rule_el = ET.Element("rule")
+            rule_el.set("id", str(rule_id))
+            rule_el.set("level", str(level))
+            cls = rule_class(doc)
+            ok = (
+                translate_windows(rule_el, doc, anchor)
+                if cls == "windows"
+                else translate_sshd(rule_el, doc)
+                if cls == "sshd"
+                else translate_auditd(rule_el, doc)
+                if cls == "auditd"
+                else False
+            )
+            if not ok:
+                print(
+                    f"WARN: {path.name}: unhandled logsource "
+                    f"{doc.get('logsource')}; skipped",
+                    file=sys.stderr,
+                )
+                skipped.append((f"{path.name}#{title}", "unhandled logsource"))
+                continue
+            finish_rule(rule_el, doc, technique)
+            if doc.get("name"):
+                pending_base_id[doc["name"]] = rule_id
+            rules_out.append((rule_el, f"{title} | {path.name}"))
+            mapping.append((rule_id, path.name, title))
+            rule_id += 1
+
+    return rules_out, mapping, skipped
+
+
+def render(rules_out, mapping, skipped, start_id):
+    lines = []
+    lines.append("<!--")
+    lines.append("  CTUM detection-lab custom Wazuh rules. GENERATED FILE -- do not")
+    lines.append("  edit by hand; regenerate with: python3 converters/sigma_to_wazuh.py")
+    lines.append(f"  Generated (UTC): {datetime.datetime.now(datetime.timezone.utc):%Y-%m-%d %H:%M}")
+    lines.append("  Rule ID <-> Sigma rule mapping:")
+    for rid, fname, title in mapping:
+        lines.append(f"    {rid} <-> {fname} :: {title}")
+    lines.append("  Skipped (no Wazuh equivalent):")
+    if skipped:
+        for name, reason in skipped:
+            lines.append(f"    SKIP {name} -- {reason}")
+    else:
+        lines.append("    (none)")
+    lines.append("-->")
+
+    body = ['<group name="ctum_sigma,">']
+    for rule_el, comment in rules_out:
+        pretty = minidom.parseString(ET.tostring(rule_el, encoding="unicode")).toprettyxml(indent="  ")
+        inner = "\n".join(
+            line for line in pretty.splitlines()[1:] if line.strip()
+        )
+        body.append(f"  <!-- {comment} -->")
+        body.append("  " + inner.replace("\n", "\n  "))
+    body.append("</group>")
+    return "\n".join(lines) + "\n" + "\n".join(body) + "\n"
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Convert Sigma rules to Wazuh XML.")
+    ap.add_argument("--sigma-dir", default="detections/sigma")
+    ap.add_argument("--output", default="detections/wazuh/custom_rules.xml")
+    ap.add_argument("--start-id", type=int, default=100001)
+    ap.add_argument(
+        "--anchor",
+        choices=["if_sid", "if_group"],
+        default="if_sid",
+        help="Sysmon anchoring; use if_group on Wazuh 4.9.0+ (wazuh/wazuh#36029).",
+    )
+    args = ap.parse_args()
+
+    sigma_dir = Path(args.sigma_dir)
+    rules_out, mapping, skipped = convert(sigma_dir, args.start_id, args.anchor)
+    Path(args.output).write_text(render(rules_out, mapping, skipped, args.start_id))
+    print(f"Wrote {len(rules_out)} rules to {args.output} (IDs {args.start_id}-{args.start_id + len(rules_out) - 1})")
+    for name, reason in skipped:
+        print(f"SKIP {name}: {reason}")
+
+
+if __name__ == "__main__":
+    main()

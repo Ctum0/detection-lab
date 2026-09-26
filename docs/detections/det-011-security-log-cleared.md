@@ -5,7 +5,7 @@
 | Detection ID | DET-011 |
 | Rule | Sigma: `detections/sigma/security_log_cleared.yml` |
 | Data source | Windows Security log, Event ID 1102, via Wazuh agent |
-| ATT&CK | T1070.001 — Clear Windows Event Logs |
+| ATT&CK | T1685.005 — Disable or Modify Tools: Clear Windows Event Logs (Defense Impairment) |
 | Severity | High |
 | Status | UNTESTED |
 

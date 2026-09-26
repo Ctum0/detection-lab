@@ -1,0 +1,156 @@
+<!--
+  CTUM detection-lab custom Wazuh rules. GENERATED FILE -- do not
+  edit by hand; regenerate with: python3 converters/sigma_to_wazuh.py
+  Generated (UTC): 2026-09-26 21:12
+  Rule ID <-> Sigma rule mapping:
+    100001 <-> linux_reverse_shell.yml :: Linux Reverse Shell Execution
+    100002 <-> local_user_creation.yml :: New Local User Creation
+    100003 <-> lsass_credential_dumping.yml :: Windows Credential Dumping via LSASS Access
+    100004 <-> powershell_download_cradle.yml :: Suspicious PowerShell Download Cradle
+    100005 <-> powershell_encoded_command.yml :: PowerShell Encoded Command Execution
+    100006 <-> scheduled_task_creation.yml :: Scheduled Task Creation
+    100007 <-> security_log_cleared.yml :: Clearing Windows Security Event Log
+    100008 <-> ssh_bruteforce.yml :: SSH Failed Authentication
+    100009 <-> ssh_bruteforce.yml :: SSH Brute Force - Multiple Failed Authentications
+    100010 <-> suid_privilege_escalation.yml :: Linux SUID Binary Privilege Escalation Attempt
+    100011 <-> suspicious_service_creation.yml :: Windows Service Creation by Suspicious Path
+  Skipped (no Wazuh equivalent):
+    SKIP ssh_success_after_failures.yml -- temporal_ordered correlation unsupported by Wazuh
+-->
+<group name="ctum_sigma,">
+  <!-- Linux Reverse Shell Execution | linux_reverse_shell.yml -->
+  <rule id="100001" level="10">
+    <match type="pcre2">(?i)(?:bash|sh|dash|nc|ncat|netcat|socat).*(?:\-i|/dev/tcp/|&gt;\&amp;|\-e)</match>
+    <group>auditd,</group>
+    <description>Linux Reverse Shell Execution [T1059.004]</description>
+    <mitre>
+      <id>T1059.004</id>
+      <tactic>Execution</tactic>
+      <technique>Unix Shell</technique>
+    </mitre>
+  </rule>
+  <!-- New Local User Creation | local_user_creation.yml -->
+  <rule id="100002" level="7">
+    <field name="win.system.channel">^Security$</field>
+    <group>windows_security,</group>
+    <field name="win.system.eventID">^4720$</field>
+    <description>New Local User Creation [T1136.001]</description>
+    <mitre>
+      <id>T1136.001</id>
+      <tactic>Persistence</tactic>
+      <technique>Local Account</technique>
+    </mitre>
+  </rule>
+  <!-- Windows Credential Dumping via LSASS Access | lsass_credential_dumping.yml -->
+  <rule id="100003" level="12">
+    <if_sid>61612</if_sid>
+    <group>sysmon_event_10,</group>
+    <field name="win.system.eventID">^10$</field>
+    <field name="win.eventdata.targetImage" type="pcre2">(?i)(?:\\lsass\.exe)$</field>
+    <field name="win.eventdata.grantedAccess" type="pcre2">(?i)^(?:0x1010|0x1410|0x1438|0x143a|0x1fffff)$</field>
+    <description>Windows Credential Dumping via LSASS Access [T1003.001]</description>
+    <mitre>
+      <id>T1003.001</id>
+      <tactic>Credential Access</tactic>
+      <technique>LSASS Memory</technique>
+    </mitre>
+  </rule>
+  <!-- Suspicious PowerShell Download Cradle | powershell_download_cradle.yml -->
+  <rule id="100004" level="10">
+    <if_sid>61603</if_sid>
+    <group>sysmon_event1,</group>
+    <field name="win.eventdata.image" type="pcre2">(?i)(?:\\powershell\.exe|\\pwsh\.exe)$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i).*(?:DownloadString|DownloadFile|Net\.WebClient|Invoke\-WebRequest|Invoke\-RestMethod|Start\-BitsTransfer).*</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i).*(?:Invoke\-Expression|IEX\(|IEX\ ).*</field>
+    <description>Suspicious PowerShell Download Cradle [T1059.001]</description>
+    <mitre>
+      <id>T1059.001</id>
+      <tactic>Execution</tactic>
+      <technique>PowerShell</technique>
+    </mitre>
+  </rule>
+  <!-- PowerShell Encoded Command Execution | powershell_encoded_command.yml -->
+  <rule id="100005" level="10">
+    <if_sid>61603</if_sid>
+    <group>sysmon_event1,</group>
+    <field name="win.eventdata.image" type="pcre2">(?i)(?:\\powershell\.exe|\\pwsh\.exe)$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i).*(?:\-EncodedCommand|\-enc).*</field>
+    <description>PowerShell Encoded Command Execution [T1059.001]</description>
+    <mitre>
+      <id>T1059.001</id>
+      <tactic>Execution</tactic>
+      <technique>PowerShell</technique>
+    </mitre>
+  </rule>
+  <!-- Scheduled Task Creation | scheduled_task_creation.yml -->
+  <rule id="100006" level="7">
+    <field name="win.system.channel">^Security$</field>
+    <group>windows_security,</group>
+    <field name="win.system.eventID">^4698$</field>
+    <description>Scheduled Task Creation [T1053.005]</description>
+    <mitre>
+      <id>T1053.005</id>
+      <tactic>Persistence</tactic>
+      <technique>Scheduled Task</technique>
+    </mitre>
+  </rule>
+  <!-- Clearing Windows Security Event Log | security_log_cleared.yml -->
+  <rule id="100007" level="10">
+    <field name="win.system.channel">^Security$</field>
+    <group>windows_security,</group>
+    <field name="win.system.eventID">^1102$</field>
+    <description>Clearing Windows Security Event Log [T1685.005]</description>
+    <mitre>
+      <id>T1685.005</id>
+      <tactic>Defense Impairment</tactic>
+      <technique>Clear Windows Event Logs</technique>
+    </mitre>
+  </rule>
+  <!-- SSH Failed Authentication | ssh_bruteforce.yml -->
+  <rule id="100008" level="5">
+    <match type="pcre2">(?i)sshd\[\d+\]: (?:Failed\ password)</match>
+    <group>syslog,sshd,</group>
+    <description>SSH Failed Authentication [T1110.001]</description>
+    <mitre>
+      <id>T1110.001</id>
+      <tactic>Credential Access</tactic>
+      <technique>Password Guessing</technique>
+    </mitre>
+  </rule>
+  <!-- SSH Brute Force - Multiple Failed Authentications | ssh_bruteforce.yml -->
+  <rule id="100009" level="10" frequency="6" timeframe="600">
+    <if_matched_sid>100008</if_matched_sid>
+    <same_source_ip/>
+    <group>syslog,sshd,</group>
+    <description>SSH Brute Force - Multiple Failed Authentications [T1110.001]</description>
+    <mitre>
+      <id>T1110.001</id>
+      <tactic>Credential Access</tactic>
+      <technique>Password Guessing</technique>
+    </mitre>
+  </rule>
+  <!-- Linux SUID Binary Privilege Escalation Attempt | suid_privilege_escalation.yml -->
+  <rule id="100010" level="7">
+    <match type="pcre2">(?i)(?:chmod).*(?:u\+s|4755|4750|4777)</match>
+    <group>auditd,</group>
+    <description>Linux SUID Binary Privilege Escalation Attempt [T1548.001]</description>
+    <mitre>
+      <id>T1548.001</id>
+      <tactic>Privilege Escalation</tactic>
+      <technique>Setuid and Setgid</technique>
+    </mitre>
+  </rule>
+  <!-- Windows Service Creation by Suspicious Path | suspicious_service_creation.yml -->
+  <rule id="100011" level="10">
+    <field name="win.system.channel">^System$</field>
+    <group>windows_system,</group>
+    <field name="win.system.eventID">^7045$</field>
+    <field name="win.eventdata.imagePath" type="pcre2">(?i).*(?:\\Temp\\|\\Temporary\ Internet\ Files\\|\\Users\\Public\\|\\ProgramData\\|\\AppData\\|powershell|pwsh|cmd\.exe|\.ps1|\.vbs|\.js|\.hta).*</field>
+    <description>Windows Service Creation by Suspicious Path [T1543.003]</description>
+    <mitre>
+      <id>T1543.003</id>
+      <tactic>Persistence</tactic>
+      <technique>Windows Service</technique>
+    </mitre>
+  </rule>
+</group>
