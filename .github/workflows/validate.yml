@@ -1,10 +1,14 @@
-on:
+name: Validate Sigma rules
+
+"on":
   push:
     paths:
       - 'detections/sigma/**'
+      - '.github/workflows/validate.yml'
   pull_request:
     paths:
       - 'detections/sigma/**'
+  workflow_dispatch:
 
 jobs:
   sigma-check:
