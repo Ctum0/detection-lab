@@ -1,0 +1,7 @@
+name: linux_auth
+priority: 20
+logsource:
+product: linux
+service: auth
+detection:
+# no field transformations needed — pass through

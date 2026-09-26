@@ -1,0 +1,4 @@
+"Failed password"
+| bin _time span=10m
+| stats count as event_count by _time src_ip
+| search event_count >= 6

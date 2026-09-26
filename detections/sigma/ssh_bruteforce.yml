@@ -1,0 +1,52 @@
+title: SSH Failed Authentication
+id: f2725e28-d476-45a7-a909-49accaed63a2
+name: ssh_failed_auth
+status: test
+description: >
+  Single failed SSH authentication event. Used as base rule for the
+  SSH brute-force correlation rule.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1110.001
+  - attack.ta0006
+logsource:
+  product: linux
+  service: auth
+detection:
+  selection:
+    - 'Failed password'
+  condition: selection
+falsepositives:
+  - Administrator mistyping password
+level: informational
+---
+title: SSH Brute Force - Multiple Failed Authentications
+id: 6d32c6dd-15dd-4039-887d-af9537334053
+status: test
+description: >
+  Detects multiple failed SSH authentication attempts from a single source,
+  indicating a password guessing attack (e.g. hydra). Correlates with Wazuh
+  rule 5712 validated in the CTUM lab.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: Sithum
+date: 2026-09-26
+tags:
+  - attack.t1110.001
+  - attack.credential_access
+correlation:
+  type: event_count
+  rules:
+    - ssh_failed_auth
+  group-by:
+    - src_ip
+  timespan: 10m
+  condition:
+    gte: 6
+falsepositives:
+  - Administrator mistyping password
+  - Legitimate monitoring tools with stale credentials
+level: high
