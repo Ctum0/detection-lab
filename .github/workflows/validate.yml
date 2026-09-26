@@ -13,9 +13,15 @@ name: Validate Sigma rules
 jobs:
   sigma-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # persist-credentials keeps the GITHUB_TOKEN in git config so the
+          # autocommit step below can push the generated SPL back.
+          persist-credentials: true
 
       - name: Install sigma-cli
         run: |
@@ -25,3 +31,39 @@ jobs:
       - name: Validate rules
         run: |
           sigma check detections/sigma/
+
+      - name: Convert Sigma to Splunk SPL
+        run: |
+          # Excluded from conversion: detections/sigma/ssh_success_after_failures.yml
+          # uses a temporal_ordered correlation, which the Splunk backend does not
+          # support ("Correlation type 'temporal_ordered' is not supported by
+          # backend"). It is moved aside so the directory conversion succeeds.
+          # NOTE: the "{stem}.spl" template has no {index}, so for multi-doc
+          # files (e.g. ssh_bruteforce.yml) only the last doc's query is kept —
+          # for ssh_bruteforce.yml that is the event_count correlation, which is
+          # the deployable detection.
+          mkdir -p /tmp/sigma-excluded
+          mv detections/sigma/ssh_success_after_failures.yml /tmp/sigma-excluded/
+          rm -f detections/splunk/*.spl
+          sigma convert -t splunk --without-pipeline detections/sigma/ --output-dir detections/splunk/ --output-filename-template "{stem}.spl"
+          mv /tmp/sigma-excluded/ssh_success_after_failures.yml detections/sigma/
+          # Ensure POSIX trailing newlines for clean diffs.
+          for f in detections/splunk/*.spl; do
+            tail -c1 "$f" | read -r _ || echo >> "$f"
+          done
+
+      - name: Commit generated SPL
+        # Never run on pull_request (fork tokens cannot push); the push trigger
+        # below only watches sigma/** + this file anyway, and [skip ci]
+        # guarantees the autocommit never loops the workflow.
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A detections/splunk/
+          if git diff --cached --quiet; then
+            echo "No SPL changes to commit."
+          else
+            git commit -m "Auto-generate Splunk SPL from Sigma [skip ci]"
+            git push
+          fi

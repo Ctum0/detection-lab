@@ -1,0 +1,1 @@
+EventID=7045 ImagePath IN ("*\\Temp\\*", "*\\Temporary Internet Files\\*", "*\\Users\\Public\\*", "*\\ProgramData\\*", "*\\AppData\\*", "*powershell*", "*pwsh*", "*cmd.exe*", "*.ps1*", "*.vbs*", "*.js*", "*.hta*")
