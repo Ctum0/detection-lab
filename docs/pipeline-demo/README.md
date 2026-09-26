@@ -1,44 +1,106 @@
-# Pipeline demo: DET-012 Notepad end-to-end
+# Pipeline Demo — End-to-End Detection Delivery
 
-Proof that the full Sigma → CI → Wazuh loop works, using a trivially
-triggerable canary rule (`notepad_execution.yml` → Wazuh 100012).
-Commit `8255cd9` ("DET-012: Notepad CI/CD pipeline test detection").
+This folder documents the complete detection-as-code lifecycle, proven live
+in the CTUM lab: a detection is written as Sigma, validated by CI, deployed
+to Wazuh automatically via CD, and proven by executing the attack it
+detects. Screenshots in this folder (named `NN-description.png`) are the
+evidence for each step.
 
-## 1. Sigma rule committed
+## The full loop
 
-![Sigma rule file in repo](01-sigma-rule.png)
+```
+ Analyst writes Sigma rule (detections/sigma/*.yml)
+        |
+        v  git push
+ GitHub Actions CI (.github/workflows/validate.yml)
+        |  - sigma check: schema + syntax + ATT&CK tag validation
+        |  - sigma convert: auto-generates Splunk SPL
+        |  - generated .spl files committed back to repo
+        v
+ GitHub Actions CD (.github/workflows/deploy-wazuh.yml)
+        |  - runs on self-hosted runner (VPS)
+        |  - converts + uploads custom_rules.xml via Wazuh API
+        |  - verifies rules are live (HTTP 200 + error:0 check)
+        v
+ Wazuh Manager (rules live, no restart needed)
+        |
+        v  attack executed on victim
+ Alert fires with custom rule ID
+        |
+        v
+ Threat Hunting / investigation / documentation
+```
 
-`detections/sigma/notepad_execution.yml` lands in the repo — the source of
-truth. (Fixed after the fact: single-backslash `Image|endswith` per repo
-convention, plus the missing `attack.t1098` technique tag; `sigma check`
-stays clean.)
+## Live test walkthrough (DET-012, rule 100012)
 
-## 2. CI validates green
+The test detection: **Notepad execution** — trivial by design, so the
+pipeline itself is what's being tested, not the detection logic.
 
-![Validate workflow green](02-ci-validate-green.png)
+| Step | What happens | Evidence |
+|---|---|---|
+| 1. Rule written | `detections/sigma/notepad_execution.yml` created; rule 100012 added to `custom_rules.xml`; `sigma check` = 0 errors, `wazuh-analysisd -t` precheck clean | `01-sigma-rule.png` |
+| 2. Push triggers CI | validate.yml runs: sigma check passes, SPL auto-generated and committed | `02-ci-validate-green.png` |
+| 3. Push triggers CD | deploy-wazuh.yml runs on the VPS runner: XML uploaded via API, HTTP 200, verify step greens | `03-deploy-green.png` (same Actions page as step 2; `Deployed OK` line is in the run logs) |
+| 4. Attack executed | `notepad.exe` run on win-victim; Sysmon Event ID 1 generated | `04-notepad-attack.png` |
+| 5. Custom rule fires | Alert `100012 — CTUM: Notepad execution` appears in Threat Hunting | `05-alert-100012.png` |
 
-`Validate Sigma rules #6` passes on the push (shares this screenshot with
-step 3 — one Actions page showed both green runs).
+Total elapsed time from `git push` to alert: under 2 minutes, zero manual
+steps.
 
-## 3. Deploy pushes to Wazuh
+## Debugging war story (why this demo matters)
 
-![Deploy workflow green](03-deploy-green.png)
+The first deploy "succeeded" but deployed nothing — a lesson in CI
+false-positives:
 
-`Deploy rules to Wazuh #4` greens. It PUTs `custom_rules.xml` to the manager
-API and the verify step confirms HTTP 200 — look for
-`Deployed OK (HTTP 200)` in the run logs (`.github/workflows/deploy-wazuh.yml`).
+1. **Silent failure:** the deploy step used `curl -sk`, which swallows HTTP
+   errors and exits 0. The workflow showed green while the manager still
+   ran old rules. Fixed by capturing the HTTP code and failing loudly on
+   anything but 200 + `"error": 0`.
+2. **Wazuh API bug:** XML comments containing HTML-escaped entities
+   (`&gt;`, `&amp;`) crash the 4.14 API's rule-upload parser with a
+   500/PicklingError. Fixed by keeping the deployed XML comment-free
+   (mapping lives in `detections/wazuh/DEPLOY-NOTES.md`).
+3. **Duplicate rule IDs:** a `local_rules.xml.bak-*` file left inside the
+   rules directory was loaded by analysisd alongside the live file,
+   double-defining every custom rule ("only first occurrence considered" —
+   a coin-flip on which version won). Fixed by moving backups out of the
+   rules directory; clean boot now loads all rules with zero warnings.
+4. **Telemetry stall vs. idle hosts:** during testing, Sysmon events
+   appeared to stop flowing. Root cause was benign: victim VMs idle at
+   ~4:45 AM generated nothing to send, and the benign Notepad test matched
+   only a level-0 rule (correctly not indexed as an alert). Combined with
+   the backup-file duplicate issue, this looked like a frozen pipeline.
 
-## 4. Attack: run notepad on the victim
+Each issue is documented because debugging the pipeline is as much a
+detection-engineering skill as writing the rules.
 
-![Notepad running on victim](04-notepad-attack.png)
+## Custom rules validated live (as of this demo)
 
-`notepad.exe` launched from Admin PowerShell on windows-victim, Sysmon EID 1
-ships via the Wazuh agent.
+Single source of truth for validation status is `docs/attack-matrix.md`
+(currently 5/12 validated). Custom rules proven firing by their own alerts:
 
-## 5. Alert: rule 100012 fires
+| Rule | Detection | Technique | Proven by |
+|---|---|---|---|
+| 100002 | Local user creation (4720) | T1136.001 | `net user backdoor /add` |
+| 100005 | Encoded PowerShell | T1059.001 | `powershell -enc ...` |
+| 100006 | Scheduled task creation (4698) | T1053.005 | `schtasks /create` |
+| 100012 | Notepad execution (canary) | T1098 | `notepad.exe` (this demo) |
 
-![Rule 100012 alert](05-alert-100012.png)
+Stock-rule observations (useful context, not custom-rule proof): 5712 fired
+on the hydra burst (DET-001), 92900 fired on benign svchost LSASS access
+(the FP case behind DET-004), 60228 observed for task creation (parent of
+100006). Custom rules 100003, 100008/100009 and the rest are UNTESTED until
+their own IDs fire — see the matrix.
 
-Threat Hunting shows `CTUM: Notepad execution - CI/CD pipeline test
-[T1098]`, rule.id **100012**, on windows-victim. Loop closed: repo → CI →
-manager → victim → alert.
+## Repo layout (what lives where)
+
+```
+detections/sigma/     source of truth - vendor-neutral rules (hand-written)
+detections/splunk/    auto-generated SPL (CI output, never hand-edited)
+detections/wazuh/     deployable Wazuh XML (converter output)
+converters/           Sigma -> Wazuh XML converter script
+docs/                 architecture, attack matrix, per-detection writeups,
+                      known limitations, evidence index
+attack-tests/         attack scenario scripts (Flagship 2)
+.github/workflows/    CI (validate + SPL gen) and CD (Wazuh deploy)
+```

@@ -16,17 +16,17 @@ cd detection-lab
 ├── README.md
 ├── converters/              ← sigma_to_wazuh.py + notes
 ├── detections/
-│   ├── sigma/               ← source of truth (11 rules)
-│   ├── wazuh/               ← custom_rules.xml (IDs 100001–100011)
-│   └── splunk/              ← CI-generated *.spl (10 files)
+│   ├── sigma/               ← source of truth (12 rules)
+│   ├── wazuh/               ← custom_rules.xml (IDs 100001–100012)
+│   └── splunk/              ← CI-generated *.spl (11 files)
 ├── docs/
 │   ├── architecture.md
 │   ├── vm-inventory.md
-│   ├── attack-matrix.md     ← all 11 detections at a glance
+│   ├── attack-matrix.md     ← all 12 detections at a glance
 │   ├── evidence.md          ← screenshot index (files in evidence/)
 │   ├── known-limitations.md ← open gaps (e.g. auditd ingestion)
 │   ├── pipeline-demo/       ← DET-012 end-to-end CI/CD screenshots
-│   └── detections/          ← one doc per detection (det-001…det-011)
+│   └── detections/          ← one doc per detection (det-001…det-012)
 ├── evidence/                ← screenshot drops (indexed by docs/evidence.md)
 ├── attack-tests/            ← scenario scripts per test
 ├── pipelines/               ← helper configs
@@ -48,15 +48,16 @@ Sigma is the source of truth:
 2. CI (`Validate Sigma rules`) runs `sigma check` on every push touching `detections/sigma/**`.
 3. CI auto-generates Splunk SPL via `sigma convert -t splunk --without-pipeline` into `detections/splunk/` (`{stem}.spl` per rule).
 4. Generated `*.spl` files are committed back automatically (`[skip ci]`, push only — never on PRs), so the SPL in the repo is always deployable without hand-editing.
-5. `ssh_success_after_failures.yml` is excluded from conversion: its `temporal_ordered` correlation is not supported by the Splunk backend. Its detection doc (`docs/detections/det-010-ssh-success-after-failures.md`) covers manual deployment.
+5. CD (`Deploy rules to Wazuh`, self-hosted runner) PUTs `detections/wazuh/custom_rules.xml` to the manager API on every push touching it, then verifies (HTTP 200 + rule present) — proven end-to-end by DET-012, see `docs/pipeline-demo/`.
+6. `ssh_success_after_failures.yml` is excluded from conversion: its `temporal_ordered` correlation is not supported by the Splunk backend. Its detection doc (`docs/detections/det-010-ssh-success-after-failures.md`) covers manual deployment.
 
 ## Metrics
 
-- **Detections:** 11 (DET-001…DET-011) across 9 ATT&CK techniques — see `docs/attack-matrix.md`
-- **Validated:** 4/11 (DET-001 SSH brute force, DET-002 encoded PowerShell, DET-005 local user, DET-006 scheduled task)
-- **Sigma rules:** 11 files in `detections/sigma/` (spec v2.1, `sigma check` clean)
-- **Wazuh rules:** 11 custom rules, IDs 100001–100011, in `detections/wazuh/custom_rules.xml`
-- **Splunk SPL:** 10 auto-generated searches in `detections/splunk/` (DET-010 excluded — temporal correlation)
+- **Detections:** 12 (DET-001…DET-012) across 10 ATT&CK techniques — see `docs/attack-matrix.md`
+- **Validated:** 5/12 (DET-001 SSH brute force, DET-002 encoded PowerShell, DET-005 local user, DET-006 scheduled task, DET-012 notepad canary)
+- **Sigma rules:** 12 files in `detections/sigma/` (spec v2.1, `sigma check` clean)
+- **Wazuh rules:** 12 custom rules, IDs 100001–100012, in `detections/wazuh/custom_rules.xml`
+- **Splunk SPL:** 11 auto-generated searches in `detections/splunk/` (DET-010 excluded — temporal correlation)
 - **Evidence:** indexed in `docs/evidence.md`, files land in `evidence/`
 - **Open limitation:** auditd ingestion gap blocking DET-008/009 — see `docs/known-limitations.md`
 

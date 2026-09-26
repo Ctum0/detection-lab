@@ -7,6 +7,7 @@ committed — this file is the index only).
 Source screenshots live in `~/Pictures/Screenshots/`; the Source column maps
 each one to its `evidence/` target name. Views: **attack** = attacker/victim
 terminal doing the thing; **SIEM** = Wazuh alert/event view proving detection.
+The end-to-end CI/CD demo (DET-012) lives separately in `docs/pipeline-demo/`.
 
 ## Lab + SIEM overview (supporting)
 

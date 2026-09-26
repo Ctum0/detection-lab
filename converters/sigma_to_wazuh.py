@@ -90,6 +90,7 @@ MITRE = {
     "T1548.001": ("Privilege Escalation", "Setuid and Setgid"),
     "T1110.001": ("Credential Access", "Password Guessing"),
     "T1685.005": ("Defense Impairment", "Clear Windows Event Logs"),
+    "T1098": ("Execution", "T1098"),  # canary test technique; display name unresolved
     "T1070.001": ("Defense Evasion", "Clear Windows Event Logs"),  # legacy ID
 }
 

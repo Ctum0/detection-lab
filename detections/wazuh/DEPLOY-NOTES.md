@@ -19,4 +19,5 @@ Rule ID <-> Sigma rule mapping:
   100009 <-> ssh_bruteforce.yml correlation (freq 6/600s)
   100010 <-> suid_privilege_escalation.yml (auditd)
   100011 <-> suspicious_service_creation.yml (7045)
+  100012 <-> notepad_execution.yml (Sysmon EID1, CI/CD canary) — VALIDATED firing
 Skipped: ssh_success_after_failures.yml (temporal_ordered unsupported)
