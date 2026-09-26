@@ -1,6 +1,6 @@
 name: Deploy rules to Wazuh
 
-on:
+"on":
   push:
     branches: [main]
     paths:
@@ -20,32 +20,33 @@ jobs:
           WAZUH_API_USER: wazuh-wui
           WAZUH_API_PASS_FILE: /home/ctum/.wazuh-api-pass
         run: |
+          set -euo pipefail
           PASS=$(cat "$WAZUH_API_PASS_FILE")
           TOKEN=$(curl -sk -X POST "$WAZUH_API_URL/security/user/authenticate" \
             -u "$WAZUH_API_USER:$PASS" | python3 -c "import sys,json;print(json.load(sys.stdin)['data']['token'])")
-          curl -sk -X PUT -H "Authorization: Bearer $TOKEN" \
+          HTTP=$(curl -sk -o /tmp/deploy_resp.json -w "%{http_code}" -X PUT \
+            -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/octet-stream" \
             "$WAZUH_API_URL/rules/files/local_rules.xml?overwrite=true" \
-            --data-binary @detections/wazuh/custom_rules.xml \
-            -w "\nHTTP:%{http_code}\n"
+            --data-binary @detections/wazuh/custom_rules.xml)
+          cat /tmp/deploy_resp.json
+          if [ "$HTTP" != "200" ]; then echo "::error::Deploy failed with HTTP $HTTP"; exit 1; fi
+          grep -q '"error": 0' /tmp/deploy_resp.json || { echo "::error::Wazuh reported an error"; exit 1; }
+          echo "Deployed OK (HTTP $HTTP)"
 
       - name: Verify rules loaded
         env:
           WAZUH_API_URL: https://localhost:55000
           WAZUH_API_USER: wazuh-wui
           WAZUH_API_PASS_FILE: /home/ctum/.wazuh-api-pass
-          run: |
+        run: |
           set -euo pipefail
-          PASS=*** "$WAZUH_API_PASS_FILE")
+          PASS=$(cat "$WAZUH_API_PASS_FILE")
           TOKEN=$(curl -sk -X POST "$WAZUH_API_URL/security/user/authenticate" \
-          -u "$WAZUH_API_USER:$PASS" | python3 -c "import sys,json;print(json.load(sys.stdin)['data']['token'])")
-          HTTP=$(curl -sk -o /tmp/deploy_resp.json -w "%{http_code}" -X PUT \
-          -H "Authorization: Bearer ***" \
-          -H "Content-Type: application/octet-stream" \
-          "$WAZUH_API_URL/rules/files/local_rules.xml?overwrite=true" \
-          --data-binary @detections/wazuh/custom_rules.xml)
-          cat /tmp/deploy_resp.json
-          if [ "$HTTP" != "200" ]; then echo "::error::Deploy failed with HTTP $HTTP"; exit 1; fi
-              grep -q '"error": 0' /tmp/deploy_resp.json || { echo "::error::Wazuh reported an error"; exit 1; }
-              echo "Deployed OK (HTTP $HTTP)"
-              
+            -u "$WAZUH_API_USER:$PASS" | python3 -c "import sys,json;print(json.load(sys.stdin)['data']['token'])")
+          HTTP=$(curl -sk -o /tmp/verify_resp.json -w "%{http_code}" \
+            -H "Authorization: Bearer $TOKEN" \
+            "$WAZUH_API_URL/rules/files/local_rules.xml")
+          if [ "$HTTP" != "200" ]; then echo "::error::Verify GET failed with HTTP $HTTP"; exit 1; fi
+          grep -q "100001" /tmp/verify_resp.json || { echo "::error::Rule 100001 not found in deployed file"; exit 1; }
+          echo "Verified OK (HTTP $HTTP, rule 100001 present)"
