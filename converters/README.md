@@ -16,18 +16,33 @@ python3 converters/sigma_to_wazuh.py --sigma-dir detections/sigma \
 python3 converters/sigma_to_wazuh.py --anchor if_group   # Wazuh 4.9.0+
 ```
 
-Requires: python3 + pyyaml. Regenerate (don't hand-edit) `custom_rules.xml`
-after any Sigma change.
+Requires: python3 + pyyaml. Note: `detections/wazuh/custom_rules.xml` has
+been hand-tuned after generation (verified against the live Wazuh 4.14.8
+ruleset — see its header comment), so re-running the converter overwrites
+those fixes. Back up first, regenerate, then re-apply review deltas.
 
 ## Mapping decisions
 
-| Sigma logsource | Wazuh anchor | Group |
+Generator defaults (flags: `--anchor if_sid`, `--start-id 100001`):
+
+| Sigma logsource | Generated anchor | Group |
 |---|---|---|
 | Sysmon `process_creation` (EID 1) | `<if_sid>61603</if_sid>` (stock 0595 parent) | `sysmon_event1` |
 | Sysmon `process_access` (EID 10) | `<if_sid>61612</if_sid>` (stock 0595 parent) | `sysmon_event_10` |
 | Windows `service: security/system` | `win.system.channel` + `win.system.eventID` fields | `windows_security` / `windows_system` |
 | Linux `service: auth` (sshd) | `<match type="pcre2">` on full_log | `syslog,sshd` |
 | Linux `service: auditd` | `<match type="pcre2">` on EXECVE full_log | `auditd` |
+
+Hand-review deltas currently in `custom_rules.xml` (keep on regenerate):
+
+- Sysmon rules use `<if_group>sysmon_event1</if_group>` /
+  `<if_group>sysmon_event_10</if_group>` instead of `if_sid` (robust on
+  4.9.0+, see Caveats).
+- Auditd rules use decoded fields `audit.command` / `audit.args` under
+  `<if_sid>80700</if_sid>` instead of full_log matches.
+- Security rules chain stock parents where stable: 100002 under 60109,
+  100006 under 60228; 100007 and 100011 use `windows_security` /
+  `windows_system` groups.
 
 - Sigma `Image|CommandLine|TargetImage|...` → `win.eventdata.*` equivalents;
   same-field OR-lists fold into one PCRE2 alternation (Wazuh ANDs fields).
@@ -44,8 +59,10 @@ after any Sigma change.
 
 1. `wazuh-logtest` the generated file first.
 2. Copy to the manager: `/var/ossec/etc/rules/custom_rules.xml`, restart.
-3. Tune: the auditd/sshd `full_log` matches are intentionally broad —
-   narrow to decoded fields once baselined.
+3. Tune: the sshd `full_log` match is intentionally broad — narrow to
+   decoded fields once baselined. (Auditd rules already use decoded
+   `audit.command` / `audit.args`, which is why the ingestion gap in
+   `docs/known-limitations.md` blocks them.)
 
 ## Caveats
 

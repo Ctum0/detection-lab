@@ -68,6 +68,6 @@ terminal doing the thing; **SIEM** = Wazuh alert/event view proving detection.
 - `detNNN-<what>.png` — detection evidence, numbered by Detection ID.
 - `lab-*` / `siem-*` — environment and overview shots.
 - `supporting-*` — useful context not tied to a DET (yet).
-- When a DET flips to TESTED/VALIDATED, move its rows' Status in the
+- When a DET flips to TESTED/VALIDATED, update its Status in the
   corresponding `docs/detections/det-*.md` and keep filenames stable so
   writeups don't rot.

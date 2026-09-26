@@ -21,7 +21,7 @@ sshd "Failed password for ..." lines; aggregates by source IP.
 - Attack: hydra -l nonexistentuser -P rockyou.txt -t 4 <victim-ip> ssh
 - Source: Parrot attacker machine
 - Result: rule 5712 fired in Wazuh Threat Hunting
-- Evidence: screenshots 04-hydra.png, 05-rule5712.png
+- Evidence: `evidence/det001-hydra-attack.png`, `evidence/det001-rule5712-bruteforce.png` (see `docs/evidence.md`)
 
 ## False-positive considerations
 - Legitimate user mistyping password repeatedly

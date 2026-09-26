@@ -1,25 +1,8 @@
 # Detections docs
 
-One markdown file per detection. Copy this template:
-
-```markdown
-# <Detection name>
-
-- Rule: `detections/sigma/<file>.yml`
-- Platforms: Wazuh / Splunk
-- MITRE ATT&CK: Txxxx.xxx
-- Log source: Sysmon Event ID xx
-- Test: `attack-tests/<scenario>.md` or `.sh`
-
-## Logic
-
-What it detects and why.
-
-## False positives
-
-Known benign triggers and tuning.
-
-## Validation
-
-Steps + expected alert output.
-```
+One markdown file per detection (`det-NNN-<slug>.md`), following the DET-001
+template: header table (Detection ID, Rule with Sigma + Wazuh ID + SPL,
+Data source, ATT&CK, Severity, Status) then Logic, Expected telemetry,
+Validation method, FP notes, Investigation guidance. Statuses mirror
+`docs/attack-matrix.md` (VALIDATED only with attack + alert evidence indexed
+in `docs/evidence.md`).
