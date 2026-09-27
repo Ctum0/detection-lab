@@ -29,6 +29,29 @@ the repo root, since Flagship 2's attack tests validate against the same
 flagship — the matrix, per-detection docs, the pipeline demo, known
 limitations — live under its own `docs/`.
 
+## Architecture
+
+```text
+detections/sigma/*.yml  (source of truth, hand-authored)
+        |
+        |  push
+        v
+CI: sigma check  ->  sigma convert -t splunk  ->  detections/splunk/*.spl
+        |                                          (auto-committed)
+        |  push (detections/wazuh/** only)
+        v
+CD (self-hosted runner, co-located with the Wazuh manager):
+  PUT detections/wazuh/custom_rules.xml -> Wazuh API
+        -> restart manager (PUT alone doesn't hot-reload)
+        -> verify rule present via GET
+        |
+        v
+Wazuh Manager (live) -> alert fires when the attack it targets runs
+```
+
+Full CI/CD mechanics, including the hot-reload bug that made the restart
+step necessary, are in `../../platform/workflows-docs.md`.
+
 ## Pipeline
 
 1. Author/edit rules in `detections/sigma/` (Sigma spec v2.1, ATT&CK tags
@@ -47,6 +70,27 @@ limitations — live under its own `docs/`.
    Proven end-to-end by DET-012, see `docs/pipeline-demo/`.
 5. `ssh_success_after_failures.yml` is excluded from SPL conversion: its
    `temporal_ordered` correlation is unsupported by the Splunk backend.
+
+## Validated rules
+
+| DET | Technique | Wazuh rule | Status |
+|---|---|---|---|
+| DET-001 | T1110.001 Password Guessing | 100008/100009 (+ stock 5712) | VALIDATED |
+| DET-002 | T1059.001 PowerShell (encoded command) | 100005 | VALIDATED |
+| DET-003 | T1059.001 PowerShell (download cradle) | 100004 | VALIDATED |
+| DET-004 | T1003.001 LSASS Memory | 100003 | VALIDATED |
+| DET-005 | T1136.001 Local Account | 100002 | VALIDATED |
+| DET-006 | T1053.005 Scheduled Task | 100006 | VALIDATED |
+| DET-007 | T1543.003 Windows Service | 100011 | VALIDATED |
+| DET-008 | T1548.001 Setuid and Setgid | 100010 | UNTESTED — auditd gap |
+| DET-009 | T1059.004 Unix Shell | 100001 | UNTESTED — auditd gap |
+| DET-010 | T1110.001 Password Guessing (temporal) | — (manual only) | UNTESTED — out of scope |
+| DET-011 | T1685.005 Clear Windows Event Logs | 100007 | VALIDATED |
+| DET-012 | T1098 (CI/CD canary) | 100012 | VALIDATED |
+
+Full detail per row: `docs/attack-matrix.md`. Per-detection writeups
+(logic, expected telemetry, FP notes, validation evidence):
+`docs/detections/`.
 
 ## Metrics
 

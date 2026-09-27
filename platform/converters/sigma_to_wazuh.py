@@ -453,7 +453,7 @@ def convert(sigma_dir, start_id, anchor):
 def render(rules_out, mapping, skipped, start_id):
     lines = []
     lines.append("<!--")
-    lines.append("  CTUM detection-lab custom Wazuh rules. GENERATED FILE -- do not")
+    lines.append("  CTUM platform custom Wazuh rules. GENERATED FILE -- do not")
     lines.append("  edit by hand; regenerate with: python3 platform/converters/sigma_to_wazuh.py")
     lines.append(f"  Generated (UTC): {datetime.datetime.now(datetime.timezone.utc):%Y-%m-%d %H:%M}")
     lines.append("  Rule ID <-> Sigma rule mapping:")
