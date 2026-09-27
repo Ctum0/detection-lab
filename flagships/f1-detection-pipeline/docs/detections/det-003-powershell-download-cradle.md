@@ -7,7 +7,7 @@
 | Data source | Sysmon process_creation (SwiftOnSecurity config) via Wazuh agent |
 | ATT&CK | T1059.001 — PowerShell |
 | Severity | High |
-| Status | UNTESTED |
+| Status | VALIDATED 2026-09-27 |
 
 ## Logic
 
@@ -20,6 +20,21 @@ Sysmon EID 1 whose `CommandLine` shows the full cradle, e.g. `IEX (New-Object Ne
 ## Validation method
 
 Host a benign text file on the attacker box and run a `DownloadString + IEX` cradle pointing at it from the Win10 victim; confirm the EID 1 and the alert.
+
+Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
+(`flagships/f2-adversary-ad-lab/docs/campaign-log.md`,
+`flagships/f2-adversary-ad-lab/attack-tests/t1059-001-powershell-cradle.md`):
+ran a `(New-Object Net.WebClient).DownloadString(...)` + `IEX` cradle
+against a benign payload hosted on the attacker box from `windows-victim`.
+Sysmon EID 1 shipped with the full cradle in `CommandLine`; custom Wazuh
+rule 100004 `CTUM: PowerShell download cradle - fetch and execute pattern
+[T1059.001]` fired at level 10. This is the same technique family as
+DET-002 (encoded command) but a distinct execution pattern — the cradle
+downloads and immediately executes in one line, whereas DET-002 catches
+pre-staged/obfuscated payloads via `-EncodedCommand`.
+Evidence: `shared/evidence/det003-rule100004-alert.png` (rule 100004,
+level 10, 2026-09-27 18:51:56). Attack-terminal screenshot still to
+capture.
 
 ## FP notes
 
