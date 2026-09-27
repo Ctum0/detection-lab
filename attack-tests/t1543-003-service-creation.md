@@ -40,7 +40,7 @@ System EID 7045 (`A service was installed in the system`) with
   pattern list models where a real attacker stages a payload, not where
   a test framework happens to install itself.
 - Attempt 2: EID 7045 shipped with `ImagePath` = `C:\Temp\AtomicService.exe`;
-  custom Wazuh rule 100011 `CTUM: Service created with suspicious binary
+  custom Wazuh rule 100011 `Detection Platform: Service created with suspicious binary
   path [T1543.003]` fired at level 10.
 
 ## Cleanup

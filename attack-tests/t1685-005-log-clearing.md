@@ -30,7 +30,7 @@ live.
 
 ## Rules fired
 
-- Custom Wazuh rule 100007 `CTUM: Windows Security event log cleared
+- Custom Wazuh rule 100007 `Detection Platform: Windows Security event log cleared
   (1102) [T1685.005]`, level 10 — **after** fixing two bugs found during
   this test (full trail in the det-doc and `../modules/adversary-emulation/docs/campaign-log.md`):
   1. Rule was anchored on `<if_group>windows_security</if_group>`, which

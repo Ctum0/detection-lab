@@ -1,4 +1,4 @@
-# Flagship 1 — Detection Pipeline
+# Detection Pipeline
 
 **Status: COMPLETE** — ART campaign complete for Windows; 9/12 detections
 validated end-to-end (attack → alert), Sigma → CI → CD → Wazuh pipeline
@@ -12,7 +12,7 @@ proven by actually running the attack it's built to catch.
 ## Layout
 
 ```text
-f1-detection-pipeline/
+detection-pipeline/
 └── docs/
     ├── attack-matrix.md      ← all 12 detections at a glance
     ├── detections/           ← one doc per detection (det-001...det-012)
@@ -20,14 +20,14 @@ f1-detection-pipeline/
     └── known-limitations.md  ← open gaps (auditd ingestion, L-001)
 ```
 
-This flagship authors into three platform-level shared resources rather
+This module authors into three platform-level shared resources rather
 than owning them outright — `detections/` (Sigma source of truth, Wazuh
 rules, generated SPL), `platform/converters/` (the Sigma→Wazuh converter),
 and `platform/pipelines/` (Sigma conversion pipeline configs) all live at
-the repo root, since Flagship 2's attack tests validate against the same
-`detections/` tree. Only the write-ups genuinely specific to this
-flagship — the matrix, per-detection docs, the pipeline demo, known
-limitations — live under its own `docs/`.
+the repo root, since the Adversary Emulation module's attack tests
+validate against the same `detections/` tree. Only the write-ups
+genuinely specific to this module — the matrix, per-detection docs, the
+pipeline demo, known limitations — live under its own `docs/`.
 
 ## Architecture
 
@@ -109,7 +109,8 @@ Full detail per row: `docs/attack-matrix.md`. Per-detection writeups
 
 ## Related
 
-- [Flagship 2](../adversary-emulation/README.md) — the attack side that
-  validates these detections (ART campaigns, per-technique writeups)
+- [Adversary Emulation](../adversary-emulation/README.md) — the attack
+  side that validates these detections (ART campaigns, per-technique
+  writeups)
 - `shared/architecture.md` — platform-wide data flow
 - `shared/lessons-learned.md` — distilled lessons from building this

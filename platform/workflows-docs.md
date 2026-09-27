@@ -79,8 +79,8 @@ written to disk — that is not the same thing as the rule being live.
 In this single-node docker deployment, `analysisd` does not hot-reload
 rule files from a `PUT` alone; a manager restart is required before an
 edited or newly added rule actually starts evaluating events. This
-produced a genuinely confusing debugging session during the Flagship 2
-Workstream 1 close-out: a parent-ID fix to rule 100007 (see
+produced a genuinely confusing debugging session during the Adversary
+Emulation module's Workstream 1 close-out: a parent-ID fix to rule 100007 (see
 `../modules/detection-pipeline/docs/detections/det-011-security-log-cleared.md`)
 looked fully deployed — clean 200, `error: 0` — but the rule still
 wouldn't fire on re-test, because the manager was still running the old

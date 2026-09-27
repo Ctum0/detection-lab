@@ -1,11 +1,11 @@
-# CTUM — Architecture
+# Architecture
 
 ## Overview
 
-CTUM is an end-to-end detection engineering and security operations platform.
-Attacks are executed in a controlled lab, telemetry flows into a dual-SIEM
-stack, detections are managed as code, and investigations are augmented by
-automation and AI with human-approved response.
+This is an end-to-end detection engineering and security operations
+platform. Attacks are executed in a controlled lab, telemetry flows into
+a dual-SIEM stack, detections are managed as code, and investigations are
+augmented by automation and AI with human-approved response.
 
 ## Data Flow
 

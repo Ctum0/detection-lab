@@ -24,7 +24,7 @@ Sysmon EID 1 with `Image: C:\Windows\System32\notepad.exe` on windows-victim.
 Run `notepad.exe` on the victim; confirm EID 1 ships and rule 100012 fires.
 
 Validated 2026-09-27 (SIEM side): custom rule 100012
-`CTUM: Notepad execution - CI/CD pipeline test [T1098]` fired on
+`Detection Platform: Notepad execution - CI/CD pipeline test [T1098]` fired on
 windows-victim. Full loop (commit `8255cd9` → validate green → deploy
 green → attack → alert) documented with screenshots in
 `docs/pipeline-demo/` (`01-sigma-rule.png` … `05-alert-100012.png`).

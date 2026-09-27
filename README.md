@@ -1,20 +1,20 @@
-# CTUM — Detection Engineering & Security Operations Platform
+# Detection Platform
 
-A detection engineering and security operations platform, built and
-operated end to end: attacks executed in a controlled lab, telemetry
-flowing into a dual-SIEM stack, detections managed as code with CI/CD,
-purple-team validation against real attack execution, and — as the
-platform grows — a threat-intel feedback loop and analyst-augmented SOAR
-closing the loop back to human decision. Organized as a monorepo: one
-folder per flagship initiative, with the detection library, attack-test
-library, and pipeline tooling shared across all of them at the platform
-level.
+An end-to-end detection engineering and security operations platform
+that I built and operate solo: attacks executed in a controlled lab,
+telemetry flowing into a dual-SIEM stack, detections managed as code
+with CI/CD, purple-team validation against real attack execution, and —
+as the platform grows — a threat-intelligence feedback loop and
+analyst-augmented SOAR closing the loop back to human decision.
+Organized as a monorepo: one folder per module, with the detection
+library, attack-test library, and pipeline tooling shared across all of
+them at the platform level.
 
 ## Getting started
 
 ```bash
-git clone git@github.com:Ctum0/ctum-platform.git
-cd ctum-platform
+git clone git@github.com:Ctum0/detection-platform.git
+cd detection-platform
 ```
 
 ## Lifecycle
@@ -46,36 +46,37 @@ case mgmt -> human decision
 Full platform architecture (network, hosts, remote access) is in
 `shared/architecture.md`.
 
-## Flagships
+## Modules
 
-| Flagship | Focus | Status |
+| Module | Focus | Status |
 |---|---|---|
-| [F1 — Detection Pipeline](modules/detection-pipeline/README.md) | Sigma→CI/CD→Wazuh, 12 rules, 9 validated | ✅ COMPLETE |
-| [F2 — Adversary Emulation & AD Lab](modules/adversary-emulation/README.md) | ART campaign, AD domain (planned), purple-team loop | 🔨 W1 COMPLETE |
-| [F3 — Cloud & Identity Security](modules/cloud-identity/README.md) | Entra ID / AWS monitoring, IaC scanning | ⬜ Not started |
-| [F4 — Analyst SOAR](modules/soar/README.md) | Enrichment, AI-assisted triage, human-approved response | ⬜ Not started |
-| [F5 — Threat Intel](modules/threat-intel/README.md) | Honeypots (Cowrie/T-Pot), MISP/OpenCTI, IOC feedback into F1 | ⬜ Not started |
+| [Detection Pipeline](modules/detection-pipeline/README.md) | Sigma→CI/CD→Wazuh, 12 rules, 9 validated | ✅ Complete |
+| [Adversary Emulation](modules/adversary-emulation/README.md) | ART campaign, AD domain (planned), purple-team loop | 🔨 Workstream 1 complete |
+| [Cloud & Identity Security](modules/cloud-identity/README.md) | Entra ID / AWS monitoring, IaC scanning | ⬜ Not started |
+| [SOAR & Automated Response](modules/soar/README.md) | Enrichment, AI-assisted triage, human-approved response | ⬜ Not started |
+| [Threat Intelligence](modules/threat-intel/README.md) | Honeypots (Cowrie/T-Pot), MISP/OpenCTI, IOC feedback into Detection Pipeline | ⬜ Not started |
 
-F1's 9/12 (not 10/12) is the actual current count — see Metrics below for
-exactly which three remain untested and why.
+The Detection Pipeline module's 9/12 is the actual current count — see
+Metrics below for exactly which three remain untested and why.
 
 ## Platform architecture
 
 ```text
                     modules/
-        (F1 complete, F2 W1 complete, F3-F5 not started)
+   (Detection Pipeline complete, Adversary Emulation Workstream 1
+              complete, the other three not started)
                          |
-         each flagship's own docs/ (matrix, campaign
+         each module's own docs/ (matrix, campaign
          logs, per-detection writeups — genuinely
-         flagship-specific content only)
+         module-specific content only)
                          |
       -------------------+-------------------
       |                  |                  |
  detections/        attack-tests/       platform/
  (Sigma source    (one writeup per   (converters/,
  of truth, Wazuh   validated          pipelines/,
- + generated       technique —        workflows-docs.md
- Splunk SPL)        F1<->F2 bridge)    — shared tooling)
+ + generated       technique — the    workflows-docs.md
+ Splunk SPL)        module bridge)     — shared tooling)
       |                  |                  |
       -------------------+-------------------
                          |
@@ -84,12 +85,12 @@ exactly which three remain untested and why.
               evidence-index, lessons-learned)
 ```
 
-`detections/`, `attack-tests/`, and `platform/` are cross-flagship
-resources at the repo root, not owned by any one flagship — F1 authors
-into `detections/` and `platform/`, F2 authors into `attack-tests/` (and
-both consume `shared/`). This is deliberate: a new flagship never needs
-its own copy of the Sigma pipeline or its own evidence index, it just
-plugs into what's already here.
+`detections/`, `attack-tests/`, and `platform/` are cross-module
+resources at the repo root, not owned by any single module — Detection
+Pipeline authors into `detections/` and `platform/`, Adversary Emulation
+authors into `attack-tests/` (and both consume `shared/`). This is
+deliberate: a new module never needs its own copy of the Sigma pipeline
+or its own evidence index, it just plugs into what's already here.
 
 ## How to add a detection
 
@@ -111,12 +112,12 @@ plugs into what's already here.
    `shared/evidence-index.md`, and flip the det-doc + matrix status to
    VALIDATED.
 
-## New flagship
+## Adding a module
 
 Add a folder under `modules/` with a `README.md` (purpose, scope,
 status) and a row in the table above. Nothing else changes — it reads
 from `detections/`, `attack-tests/`, `platform/`, and `shared/` the same
-way F1 and F2 already do.
+way Detection Pipeline and Adversary Emulation already do.
 
 ## Metrics
 
@@ -139,17 +140,17 @@ Telemetry, ART) are in `shared/lessons-learned.md`.
 ## Repo layout
 
 ```text
-ctum-platform/
+detection-platform/
 ├── README.md
 ├── modules/
-│   ├── f1-detection-pipeline/
+│   ├── detection-pipeline/
 │   │   └── docs/                ← attack-matrix, per-detection writeups,
 │   │                               pipeline-demo, known-limitations
-│   ├── f2-adversary-ad-lab/
+│   ├── adversary-emulation/
 │   │   └── docs/                ← campaign-log.md
-│   ├── f3-cloud-identity/       ← README only (not started)
-│   ├── f4-soar/                 ← README only (not started)
-│   └── f5-threat-intel/         ← README only (not started)
+│   ├── cloud-identity/          ← README only (not started)
+│   ├── soar/                    ← README only (not started)
+│   └── threat-intel/            ← README only (not started)
 ├── platform/
 │   ├── converters/              ← sigma_to_wazuh.py
 │   ├── pipelines/               ← Sigma conversion pipeline configs
@@ -157,9 +158,9 @@ ctum-platform/
 ├── shared/
 │   ├── architecture.md          ← platform-wide network/hosts/data flow
 │   ├── vm-inventory.md          ← VM & asset inventory
-│   ├── evidence/                ← screenshot evidence (all flagships)
+│   ├── evidence/                ← screenshot evidence (every module)
 │   ├── evidence-index.md        ← screenshot index
-│   └── lessons-learned.md       ← distilled lessons across flagships
+│   └── lessons-learned.md       ← distilled lessons across modules
 ├── detections/
 │   ├── sigma/                   ← source of truth (12 rules)
 │   ├── wazuh/                   ← custom_rules.xml, DEPLOY-NOTES.md

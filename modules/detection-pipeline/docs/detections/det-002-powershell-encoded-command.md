@@ -22,7 +22,7 @@ Sysmon Event ID 1 with `Image: C:\Windows\System32\WindowsPowerShell\v1.0\powers
 On the Win10 victim run `powershell -enc <base64 of whoami>` and confirm a Sysmon EID 1 ships to Wazuh/Splunk and the rule fires.
 
 Validated 2026-09-27 (SIEM side): custom Wazuh rule 100005
-`CTUM: PowerShell with encoded command [T1059.001]` fired on windows-victim
+`Detection Platform: PowerShell with encoded command [T1059.001]` fired on windows-victim
 at 03:13, level 10 — first custom Sysmon rule to fire in the lab. Confirm
 the triggering process was the planned test and not unexpected activity.
 Evidence: `evidence/det002-rule100005-encoded.png`. Attack-terminal

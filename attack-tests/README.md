@@ -1,7 +1,7 @@
 # Attack tests
 
 One scenario writeup per validated technique. Each maps to a detection in
-[Flagship 1](../modules/detection-pipeline/README.md):
+the [Detection Pipeline](../modules/detection-pipeline/README.md) module:
 
 - `attack-tests/<technique>.md` — exact commands (ART invocation and/or
   manual commands), expected telemetry, rules fired, cleanup, notes.

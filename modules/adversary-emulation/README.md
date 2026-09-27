@@ -1,12 +1,13 @@
-# Flagship 2 — Adversary Emulation & AD Lab
+# Adversary Emulation & AD Lab
 
 **Status: Workstream 1 (Windows campaign) COMPLETE**; Workstreams 2-4 not
 started.
 
 Adversary emulation against the lab's Windows and Linux victims — Atomic
 Red Team-driven attack execution that validates the detections built in
-[Flagship 1](../detection-pipeline/README.md). Every "VALIDATED" status
-in the F1 attack matrix traces back to a test run and writeup here.
+the [Detection Pipeline](../detection-pipeline/README.md) module. Every
+"VALIDATED" status in its attack matrix traces back to a test run and
+writeup here.
 
 ## Workstreams
 
@@ -20,16 +21,17 @@ in the F1 attack matrix traces back to a test run and writeup here.
 ## Layout
 
 ```text
-f2-adversary-ad-lab/
+adversary-emulation/
 └── docs/
     └── campaign-log.md  ← chronological W1 log: install saga, per-test
                              outcomes, bugs found
 ```
 
 Technique writeups themselves live in the top-level `attack-tests/`, not
-here — they're a shared/cross-flagship resource (every write-up maps back
-to an F1 detection), same as `detections/` and `platform/`. This flagship
-folder keeps only what's genuinely F2-specific: the campaign narrative.
+here — they're a shared/cross-module resource (every write-up maps back
+to a Detection Pipeline detection), same as `detections/` and
+`platform/`. This module's folder keeps only what's genuinely specific to
+it: the campaign narrative.
 
 ## W1 close-out summary
 
@@ -41,10 +43,12 @@ folder keeps only what's genuinely F2-specific: the campaign narrative.
 - Found and fixed 2 rule-parenting bugs and 1 CD hot-reload bug along the
   way; distilled into `shared/lessons-learned.md`.
 - T1548.001 and T1059.004 (Linux/auditd) remain untested — blocked
-  upstream by the F1 auditd ingestion gap, not an ART/campaign issue.
+  upstream by the Detection Pipeline module's auditd ingestion gap, not
+  an ART/campaign issue.
 
 ## Related
 
-- [Flagship 1](../detection-pipeline/README.md) — the detections these
-  attacks validate; see `docs/attack-matrix.md` there for live status
+- [Detection Pipeline](../detection-pipeline/README.md) — the detections
+  these attacks validate; see `docs/attack-matrix.md` there for live
+  status
 - `shared/evidence-index.md` — screenshot evidence for every test here

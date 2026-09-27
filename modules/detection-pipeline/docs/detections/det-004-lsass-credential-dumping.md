@@ -21,7 +21,7 @@ Sysmon EID 10 with `SourceImage` = dumping tool, `TargetImage` = `C:\Windows\sys
 
 Run a benign LSASS-handle probe (e.g. Sysinternals `procdump -ma lsass.exe` in test mode, or Atomic Red Team T1003.001 test) on the Win10 victim; confirm EID 10 and the alert. Coordinate first — AV/EDR may block.
 
-Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
+Validated 2026-09-27 as part of the Adversary Emulation module's Workstream 1 ART campaign
 (`modules/adversary-emulation/docs/campaign-log.md`,
 `attack-tests/t1003-001-lsass-dump.md`): ran
 the Atomic Red Team T1003.001 comsvcs.dll MiniDump test on `windows-victim`
@@ -30,7 +30,7 @@ C:\Temp\lsass_dump.dmp full`, dumping LSASS memory via the
 undocumented `comsvcs.dll` `MiniDump` export rather than a
 dedicated dumping tool. Sysmon EID 10 shipped with `TargetImage`
 `C:\Windows\system32\lsass.exe` and a sensitive `GrantedAccess` mask;
-custom Wazuh rule 100003 `CTUM: Sensitive handle to LSASS - credential
+custom Wazuh rule 100003 `Detection Platform: Sensitive handle to LSASS - credential
 dumping pattern [T1003.001]` fired twice at level 12 (rundll32 opens the
 LSASS handle across two distinct access events for this technique).
 Confirmed the firing process was the planned ART test, not unexpected

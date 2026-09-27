@@ -21,7 +21,7 @@ Security EID 1102 with `SubjectUserName` / `SubjectDomainName` identifying who c
 
 On the Win10 victim run `wevtutil cl Security` (or Clear-EventLog) as admin; confirm 1102 ships and the rule fires. Re-enable forwarding checks afterwards.
 
-Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
+Validated 2026-09-27 as part of the Adversary Emulation module's Workstream 1 ART campaign
 (`modules/adversary-emulation/docs/campaign-log.md`,
 `attack-tests/t1685-005-log-clearing.md`).
 Two bugs surfaced before this one actually fired:
@@ -53,7 +53,7 @@ Ransomware Full Log Clear"** on `windows-victim`, which loops
 Security) — ending on an expected failure clearing
 `Microsoft-Windows-LiveId/Analytic` (`Access is denied`), which does not
 affect the Security-log clear earlier in the loop. Security EID 1102
-shipped, and custom Wazuh rule 100007 `CTUM: Windows Security event log
+shipped, and custom Wazuh rule 100007 `Detection Platform: Windows Security event log
 cleared (1102) [T1685.005]` fired at level 10 at 18:22:44. Evidence:
 `shared/evidence/det011-wevtutil-attack.png` (attack view — the ART test
 run), `shared/evidence/det011-rule100007-alert.png` (SIEM view — the

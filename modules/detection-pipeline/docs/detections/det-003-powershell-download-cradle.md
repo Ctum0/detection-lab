@@ -21,13 +21,13 @@ Sysmon EID 1 whose `CommandLine` shows the full cradle, e.g. `IEX (New-Object Ne
 
 Host a benign text file on the attacker box and run a `DownloadString + IEX` cradle pointing at it from the Win10 victim; confirm the EID 1 and the alert.
 
-Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
+Validated 2026-09-27 as part of the Adversary Emulation module's Workstream 1 ART campaign
 (`modules/adversary-emulation/docs/campaign-log.md`,
 `attack-tests/t1059-001-powershell-cradle.md`):
 ran a `(New-Object Net.WebClient).DownloadString(...)` + `IEX` cradle
 against a benign payload hosted on the attacker box from `windows-victim`.
 Sysmon EID 1 shipped with the full cradle in `CommandLine`; custom Wazuh
-rule 100004 `CTUM: PowerShell download cradle - fetch and execute pattern
+rule 100004 `Detection Platform: PowerShell download cradle - fetch and execute pattern
 [T1059.001]` fired at level 10. This is the same technique family as
 DET-002 (encoded command) but a distinct execution pattern — the cradle
 downloads and immediately executes in one line, whereas DET-002 catches

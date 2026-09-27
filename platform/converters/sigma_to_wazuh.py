@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Sigma -> Wazuh XML converter for the CTUM platform.
+"""Sigma -> Wazuh XML converter for this detection platform.
 
 Converts detections/sigma/*.yml into a single Wazuh custom rules file
 (detections/wazuh/custom_rules.xml) with stable IDs starting at 100001.
 
 Approach adapted from Alanv0303/Rule-converter (MIT): parse multi-doc
 Sigma YAML, translate selections into Wazuh <field>/<match> checks, emit
-one XML <rule> per convertible doc. Extended here with CTUM repo rules:
-per-logsource anchoring (if_sid/if_group + groups), Sigma->Wazuh field
+one XML <rule> per convertible doc. Extended here with repo-specific
+rules: per-logsource anchoring (if_sid/if_group + groups), Sigma->Wazuh field
 mapping, MITRE blocks, event_count correlations via frequency/timeframe,
 and an ID-mapping header comment.
 
@@ -453,7 +453,7 @@ def convert(sigma_dir, start_id, anchor):
 def render(rules_out, mapping, skipped, start_id):
     lines = []
     lines.append("<!--")
-    lines.append("  CTUM platform custom Wazuh rules. GENERATED FILE -- do not")
+    lines.append("  Detection Platform custom Wazuh rules. GENERATED FILE -- do not")
     lines.append("  edit by hand; regenerate with: python3 platform/converters/sigma_to_wazuh.py")
     lines.append(f"  Generated (UTC): {datetime.datetime.now(datetime.timezone.utc):%Y-%m-%d %H:%M}")
     lines.append("  Rule ID <-> Sigma rule mapping:")
@@ -467,7 +467,7 @@ def render(rules_out, mapping, skipped, start_id):
         lines.append("    (none)")
     lines.append("-->")
 
-    body = ['<group name="ctum_sigma,">']
+    body = ['<group name="detection_platform_sigma,">']
     for rule_el, comment in rules_out:
         pretty = minidom.parseString(ET.tostring(rule_el, encoding="unicode")).toprettyxml(indent="  ")
         inner = "\n".join(

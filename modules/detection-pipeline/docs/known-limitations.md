@@ -45,7 +45,8 @@ points at collection/forwarding, not at auditd itself.
 
 ### Update 2026-09-27 — root cause found: auditd itself is dead, not a decoding/forwarding gap
 
-Further troubleshooting during the Flagship 2 Workstream 1 close-out ruled
+Further troubleshooting during the Adversary Emulation module's
+Workstream 1 close-out ruled
 out decoding/config and pinned the fault on the `linux-victim` auditd
 service itself:
 

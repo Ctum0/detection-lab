@@ -31,7 +31,7 @@ of the sensitive masks (`0x1010`, `0x1410`, `0x1438`, `0x143a`,
 
 ## Rules fired
 
-- Custom Wazuh rule 100003 `CTUM: Sensitive handle to LSASS - credential
+- Custom Wazuh rule 100003 `Detection Platform: Sensitive handle to LSASS - credential
   dumping pattern [T1003.001]`, level 12 — fired **twice** (rundll32
   opens the LSASS handle across two distinct access events for this
   technique).

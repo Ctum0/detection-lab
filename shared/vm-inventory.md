@@ -1,4 +1,4 @@
-# CTUM — VM & Asset Inventory
+# VM & Asset Inventory
 
 ## Virtual Machines (Proxmox)
 
@@ -28,8 +28,8 @@
 
 | Asset | Purpose | Phase |
 |---|---|---|
-| dc-01 | Active Directory DC | Flagship 2 (AD) |
-| win-member-01 | Domain member | Flagship 2 (AD) |
+| dc-01 | Active Directory DC | Adversary Emulation (AD) |
+| win-member-01 | Domain member | Adversary Emulation (AD) |
 | sensor | Suricata / network telemetry | TBD |
 | honeypot | Cowrie/T-Pot | TI feedback loop |
-| TheHive / MISP / OpenCTI | Case mgmt + TIP | Flagship 4 / TI |
+| TheHive / MISP / OpenCTI | Case mgmt + TIP | SOAR / TI |

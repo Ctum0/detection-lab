@@ -21,7 +21,7 @@ System EID 7045 with `ServiceName`, `ImagePath` (suspicious location), `ServiceT
 
 Install a test service pointing at a Temp binary: `sc create LabSvc binPath= "C:\Temp\labtest.exe"`; confirm 7045 and the alert, then `sc delete LabSvc`.
 
-Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
+Validated 2026-09-27 as part of the Adversary Emulation module's Workstream 1 ART campaign
 (`modules/adversary-emulation/docs/campaign-log.md`,
 `attack-tests/t1543-003-service-creation.md`).
 
@@ -35,7 +35,7 @@ realistically stage a payload in — not test-based, so it has no reason to
 match ART's own install directory. Re-ran with `-PromptForInputArgs` to
 override the input args and set `binary_path=C:\Temp\AtomicService.exe`,
 matching the actual threat pattern; EID 7045 shipped with that `ImagePath`
-and custom Wazuh rule 100011 `CTUM: Service created with suspicious
+and custom Wazuh rule 100011 `Detection Platform: Service created with suspicious
 binary path [T1543.003]` fired at level 10.
 Evidence: `shared/evidence/det007-rule100011-alert.png` (rule 100011,
 level 10, 2026-09-27 18:43:53). Attack-terminal screenshot still to

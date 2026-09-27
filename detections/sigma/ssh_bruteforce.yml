@@ -29,7 +29,7 @@ status: test
 description: >
   Detects multiple failed SSH authentication attempts from a single source,
   indicating a password guessing attack (e.g. hydra). Correlates with Wazuh
-  rule 5712 validated in the CTUM lab.
+  rule 5712 validated in the lab.
 references:
   - https://attack.mitre.org/techniques/T1110/001/
 author: Sithum

@@ -1,7 +1,7 @@
 # Pipeline Demo — End-to-End Detection Delivery
 
 This folder documents the complete detection-as-code lifecycle, proven live
-in the CTUM lab: a detection is written as Sigma, validated by CI, deployed
+in the lab: a detection is written as Sigma, validated by CI, deployed
 to Wazuh automatically via CD, and proven by executing the attack it
 detects. Screenshots in this folder (named `NN-description.png`) are the
 evidence for each step.
@@ -44,7 +44,7 @@ pipeline itself is what's being tested, not the detection logic.
 | 2. Push triggers CI | validate.yml runs: sigma check passes, SPL auto-generated and committed | `02-ci-validate-green.png` |
 | 3. Push triggers CD | deploy-wazuh.yml runs on the VPS runner: XML uploaded via API, HTTP 200, verify step greens | `03-deploy-green.png` (same Actions page as step 2; `Deployed OK` line is in the run logs) |
 | 4. Attack executed | `notepad.exe` run on win-victim; Sysmon Event ID 1 generated | `04-notepad-attack.png` |
-| 5. Custom rule fires | Alert `100012 — CTUM: Notepad execution` appears in Threat Hunting | `05-alert-100012.png` |
+| 5. Custom rule fires | Alert `100012 — Detection Platform: Notepad execution` appears in Threat Hunting | `05-alert-100012.png` |
 
 Total elapsed time from `git push` to alert: under 2 minutes.
 

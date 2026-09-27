@@ -20,7 +20,7 @@ Security EID 4698 (`A scheduled task was created`) with `TaskName`,
 
 - Stock 60228 `A scheduled task was created` — observed as the parent
   event.
-- Custom Wazuh rule 100006 `CTUM: Scheduled task created (4698)
+- Custom Wazuh rule 100006 `Detection Platform: Scheduled task created (4698)
   [T1053.005]`, level 7 — fired shortly after a manager restart from an
   unrelated rule deploy (restart timing was coincidental, not required
   for this rule).

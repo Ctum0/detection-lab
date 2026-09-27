@@ -1,10 +1,10 @@
 # Lessons Learned
 
-Distilled lessons from building [Flagship 1](../modules/detection-pipeline/README.md)
-(detection pipeline) and [Flagship 2](../modules/adversary-emulation/README.md)
-(ART-driven validation), grouped by area. Each entry links back to the
-detection doc, campaign log or pipeline-demo writeup where it was found
-in detail.
+Distilled lessons from building the [Detection Pipeline](../modules/detection-pipeline/README.md)
+module and the [Adversary Emulation](../modules/adversary-emulation/README.md)
+module (ART-driven validation), grouped by area. Each entry links back to
+the detection doc, campaign log or pipeline-demo writeup where it was
+found in detail.
 
 ## Sigma / spec
 

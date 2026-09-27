@@ -24,7 +24,7 @@ and `CommandLine` containing both a download primitive
 
 ## Rules fired
 
-- Custom Wazuh rule 100004 `CTUM: PowerShell download cradle - fetch and
+- Custom Wazuh rule 100004 `Detection Platform: PowerShell download cradle - fetch and
   execute pattern [T1059.001]`, level 10.
 
 ## Cleanup

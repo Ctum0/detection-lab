@@ -24,7 +24,7 @@ Security EID 4720 (`A user account was created`) with `TargetUserName` =
   Subject `ctum`.
 - Supporting: 92039 (net.exe execution) / 92033 (PowerShell discovery)
   observed alongside.
-- Custom Wazuh rule 100002 `CTUM: Local user account created (4720)
+- Custom Wazuh rule 100002 `Detection Platform: Local user account created (4720)
   [T1136.001]`.
 
 ## Cleanup

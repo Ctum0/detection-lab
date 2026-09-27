@@ -1,9 +1,9 @@
 # Campaign Log — Workstream 1 (Windows Campaign)
 
-Chronological log of the Flagship 2 Workstream 1 close-out: standing up
-Atomic Red Team on `windows-victim` and running it through the
-Windows-side custom Wazuh rules that were sitting UNTESTED in the
-[Flagship 1 attack matrix](../../detection-pipeline/docs/attack-matrix.md).
+Chronological log of the Adversary Emulation module's Workstream 1
+close-out: standing up Atomic Red Team on `windows-victim` and running it
+through the Windows-side custom Wazuh rules that were sitting UNTESTED in
+the [Detection Pipeline attack matrix](../../detection-pipeline/docs/attack-matrix.md).
 Per-technique detail lives in `../attack-tests/`; this log is the
 narrative — what was tried, what broke, in what order.
 
@@ -133,7 +133,7 @@ pipeline" — see `shared/lessons-learned.md`.
 7 techniques covered in this writeup (T1110.001, T1136.001, T1003.001,
 T1059.001, T1053.005, T1685.005, T1543.003), 4 flipped from UNTESTED to
 VALIDATED this session (DET-003, DET-004, DET-007, DET-011), bringing the
-Flagship 1 matrix to 9/12. DET-008/DET-009 (Linux/auditd) remain
+Detection Pipeline matrix to 9/12. DET-008/DET-009 (Linux/auditd) remain
 untested, blocked upstream by the auditd ingestion gap — not an ART or
 campaign issue, see
 `../../detection-pipeline/docs/known-limitations.md` L-001.

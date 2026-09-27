@@ -1,4 +1,4 @@
-# Flagship 4 — SOAR & Automated Response
+# SOAR & Automated Response
 
 **Status: NOT STARTED**
 
@@ -18,7 +18,9 @@ Close the loop from alert to human decision with automation:
 
 ## Dependencies
 
-- Consumes alerts produced by [Flagship 1](../detection-pipeline/README.md)
-  (and eventually F2/F3).
+- Consumes alerts produced by the
+  [Detection Pipeline](../detection-pipeline/README.md) module (and
+  eventually Adversary Emulation / Cloud & Identity Security).
 - No infrastructure stood up yet — see `shared/vm-inventory.md` for planned
-  assets (TheHive / MISP / OpenCTI listed as Flagship 4 / TI phase).
+  assets (TheHive / MISP / OpenCTI listed as SOAR / Threat Intelligence
+  phase).

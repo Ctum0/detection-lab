@@ -22,7 +22,7 @@ Security EID 4698 including `TaskName`, `TaskContent` (XML with Exec action/comm
 Create a test task with `schtasks /create /tn LabTest /tr calc.exe /sc onlogon`; confirm 4698 ships and the rule fires, then delete it.
 
 Validated 2026-09-27 (SIEM side): custom Wazuh rule 100006
-`CTUM: Scheduled task created (4698) [T1053.005]` fired on windows-victim
+`Detection Platform: Scheduled task created (4698) [T1053.005]` fired on windows-victim
 at 03:16, level 7, shortly after a `Wazuh server started` event (rule
 deploy restart). Stock parent 60228 observed earlier the same night.
 Evidence: `evidence/det006-rule100006-task.png`,
