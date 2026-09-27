@@ -65,7 +65,7 @@
 
   
   <rule id="100007" level="10">
-    <if_group>windows_security</if_group>
+    <if_sid>63103</if_sid>
     <field name="win.system.eventID">^1102$</field>
     <description>CTUM: Windows Security event log cleared (1102) [T1685.005]</description>
     <mitre>
