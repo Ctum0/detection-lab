@@ -4,5 +4,5 @@ One markdown file per detection (`det-NNN-<slug>.md`), following the DET-001
 template: header table (Detection ID, Rule with Sigma + Wazuh ID + SPL,
 Data source, ATT&CK, Severity, Status) then Logic, Expected telemetry,
 Validation method, FP notes, Investigation guidance. Statuses mirror
-`docs/attack-matrix.md` (VALIDATED only with attack + alert evidence indexed
-in `docs/evidence.md`).
+`../attack-matrix.md` (VALIDATED only with attack + alert evidence indexed
+in `../../../../shared/evidence-index.md`).

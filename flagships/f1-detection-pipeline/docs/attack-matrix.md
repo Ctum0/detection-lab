@@ -2,7 +2,7 @@
 
 All 11 detections: technique → data source → artifacts → status.
 Per-detection writeups live in `docs/detections/det-*.md`; screenshot
-evidence is indexed in `docs/evidence.md`.
+evidence is indexed in `shared/evidence-index.md`.
 
 | ID | Technique | Tactic | Data source | Sigma file | Wazuh rule | SPL file | Status | Notes |
 |---|---|---|---|---|---|---|---|---|

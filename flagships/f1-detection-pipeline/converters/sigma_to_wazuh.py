@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Sigma -> Wazuh XML converter for the CTUM detection-lab.
 
-Converts detections/sigma/*.yml into a single Wazuh custom rules file
-(detections/wazuh/custom_rules.xml) with stable IDs starting at 100001.
+Converts flagships/f1-detection-pipeline/detections/sigma/*.yml into a
+single Wazuh custom rules file
+(flagships/f1-detection-pipeline/detections/wazuh/custom_rules.xml) with
+stable IDs starting at 100001.
 
 Approach adapted from Alanv0303/Rule-converter (MIT): parse multi-doc
 Sigma YAML, translate selections into Wazuh <field>/<match> checks, emit
@@ -11,11 +13,13 @@ per-logsource anchoring (if_sid/if_group + groups), Sigma->Wazuh field
 mapping, MITRE blocks, event_count correlations via frequency/timeframe,
 and an ID-mapping header comment.
 
-Usage:
-  python3 converters/sigma_to_wazuh.py
-  python3 converters/sigma_to_wazuh.py --sigma-dir detections/sigma \\
-      --output detections/wazuh/custom_rules.xml --start-id 100001
-  python3 converters/sigma_to_wazuh.py --anchor if_group   # Wazuh 4.9.0+
+Usage (run from the repo root):
+  python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py
+  python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py \\
+      --sigma-dir flagships/f1-detection-pipeline/detections/sigma \\
+      --output flagships/f1-detection-pipeline/detections/wazuh/custom_rules.xml \\
+      --start-id 100001
+  python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py --anchor if_group   # Wazuh 4.9.0+
 
 Requirements: python3 + pyyaml. No sigma-cli needed.
 
@@ -479,8 +483,8 @@ def render(rules_out, mapping, skipped, start_id):
 
 def main():
     ap = argparse.ArgumentParser(description="Convert Sigma rules to Wazuh XML.")
-    ap.add_argument("--sigma-dir", default="detections/sigma")
-    ap.add_argument("--output", default="detections/wazuh/custom_rules.xml")
+    ap.add_argument("--sigma-dir", default="flagships/f1-detection-pipeline/detections/sigma")
+    ap.add_argument("--output", default="flagships/f1-detection-pipeline/detections/wazuh/custom_rules.xml")
     ap.add_argument("--start-id", type=int, default=100001)
     ap.add_argument(
         "--anchor",

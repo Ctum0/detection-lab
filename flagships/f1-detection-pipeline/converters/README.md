@@ -9,11 +9,15 @@ parse multi-doc Sigma YAML, translate selections to Wazuh checks, emit XML.
 Extended for this repo with logsource-aware anchoring, Sigma→Wazuh field
 mapping, MITRE blocks, `event_count` correlations, and an ID-mapping header.
 
+Run from the repo root:
+
 ```bash
-python3 converters/sigma_to_wazuh.py
-python3 converters/sigma_to_wazuh.py --sigma-dir detections/sigma \
-    --output detections/wazuh/custom_rules.xml --start-id 100001
-python3 converters/sigma_to_wazuh.py --anchor if_group   # Wazuh 4.9.0+
+python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py
+python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py \
+    --sigma-dir flagships/f1-detection-pipeline/detections/sigma \
+    --output flagships/f1-detection-pipeline/detections/wazuh/custom_rules.xml \
+    --start-id 100001
+python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py --anchor if_group   # Wazuh 4.9.0+
 ```
 
 Requires: python3 + pyyaml. Note: `detections/wazuh/custom_rules.xml` has
@@ -41,8 +45,9 @@ Hand-review deltas currently in `custom_rules.xml` (keep on regenerate):
 - Auditd rules use decoded fields `audit.command` / `audit.args` under
   `<if_sid>80700</if_sid>` instead of full_log matches.
 - Security rules chain stock parents where stable: 100002 under 60109,
-  100006 under 60228; 100007 and 100011 use `windows_security` /
-  `windows_system` groups.
+  100006 under 60228; 100007 uses `if_sid` on `63103` (event-log-cleared
+  parent, not `windows_security` — see `docs/known-limitations.md` /
+  `shared/lessons-learned.md` for why); 100011 uses `windows_system` group.
 
 - Sigma `Image|CommandLine|TargetImage|...` → `win.eventdata.*` equivalents;
   same-field OR-lists fold into one PCRE2 alternation (Wazuh ANDs fields).
@@ -58,7 +63,9 @@ Hand-review deltas currently in `custom_rules.xml` (keep on regenerate):
 ## Deploy
 
 1. `wazuh-logtest` the generated file first.
-2. Copy to the manager: `/var/ossec/etc/rules/custom_rules.xml`, restart.
+2. CI (`.github/workflows/deploy-wazuh.yml`) PUTs it to the manager API and
+   restarts the manager container — single-node docker does not hot-reload
+   rule files on PUT alone (see `shared/lessons-learned.md`).
 3. Tune: the sshd `full_log` match is intentionally broad — narrow to
    decoded fields once baselined. (Auditd rules already use decoded
    `audit.command` / `audit.args`, which is why the ingestion gap in
