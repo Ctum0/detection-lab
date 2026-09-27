@@ -23,7 +23,7 @@ On the Win10 victim run `wevtutil cl Security` (or Clear-EventLog) as admin; con
 
 Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
 (`flagships/f2-adversary-ad-lab/docs/campaign-log.md`,
-`flagships/f2-adversary-ad-lab/attack-tests/t1685-005-log-clearing.md`).
+`attack-tests/t1685-005-log-clearing.md`).
 Two bugs surfaced before this one actually fired:
 
 1. **Wrong parent (rule-authoring bug).** Rule 100007 originally anchored
@@ -35,7 +35,7 @@ Two bugs surfaced before this one actually fired:
    silently never fired despite the base 1102 events shipping fine. Fixed
    by anchoring on `<if_sid>63103</if_sid>` instead — verified first with
    `wazuh-logtest` that 63103 decodes an EventID 1102 record before
-   redeploying (see `../../detections/wazuh/DEPLOY-NOTES.md`).
+   redeploying (see `../../../../detections/wazuh/DEPLOY-NOTES.md`).
 2. **CD hot-reload bug (deploy pipeline, not this rule).** After fixing
    the parent and pushing, the deploy workflow reported a clean `HTTP 200`
    / `error: 0` from the Wazuh API PUT, but the rule still didn't fire on

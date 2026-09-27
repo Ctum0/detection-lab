@@ -1,6 +1,6 @@
 # T1053.005 — Scheduled Task Creation
 
-Validates: [DET-006](../../f1-detection-pipeline/docs/detections/det-006-scheduled-task-creation.md)
+Validates: [DET-006](../flagships/f1-detection-pipeline/docs/detections/det-006-scheduled-task-creation.md)
 (Wazuh custom 100006, chains stock 60228)
 
 ## Commands

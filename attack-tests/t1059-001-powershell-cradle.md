@@ -1,8 +1,8 @@
 # T1059.001 — PowerShell Download Cradle
 
-Validates: [DET-003](../../f1-detection-pipeline/docs/detections/det-003-powershell-download-cradle.md)
+Validates: [DET-003](../flagships/f1-detection-pipeline/docs/detections/det-003-powershell-download-cradle.md)
 (Wazuh custom 100004). See also
-[DET-002](../../f1-detection-pipeline/docs/detections/det-002-powershell-encoded-command.md)
+[DET-002](../flagships/f1-detection-pipeline/docs/detections/det-002-powershell-encoded-command.md)
 (custom 100005, encoded command) — same technique, different execution
 pattern, validated separately.
 

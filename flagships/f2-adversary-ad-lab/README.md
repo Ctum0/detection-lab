@@ -21,12 +21,15 @@ in the F1 attack matrix traces back to a test run and writeup here.
 
 ```text
 f2-adversary-ad-lab/
-├── attack-tests/     ← one writeup per validated technique (exact
-│                        commands, expected telemetry, rules fired, cleanup)
 └── docs/
     └── campaign-log.md  ← chronological W1 log: install saga, per-test
                              outcomes, bugs found
 ```
+
+Technique writeups themselves live in the top-level `attack-tests/`, not
+here — they're a shared/cross-flagship resource (every write-up maps back
+to an F1 detection), same as `detections/` and `platform/`. This flagship
+folder keeps only what's genuinely F2-specific: the campaign narrative.
 
 ## W1 close-out summary
 
@@ -34,7 +37,7 @@ f2-adversary-ad-lab/
   `docs/campaign-log.md`).
 - Validated 7 techniques end-to-end (attack → telemetry → custom Wazuh
   rule fired): T1110.001, T1136.001, T1003.001, T1059.001, T1053.005,
-  T1685.005, T1543.003 — writeups in `attack-tests/`.
+  T1685.005, T1543.003 — writeups in the top-level `attack-tests/`.
 - Found and fixed 2 rule-parenting bugs and 1 CD hot-reload bug along the
   way; distilled into `shared/lessons-learned.md`.
 - T1548.001 and T1059.004 (Linux/auditd) remain untested — blocked

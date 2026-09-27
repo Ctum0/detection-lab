@@ -1,6 +1,6 @@
 # T1685.005 — Clear Windows Event Logs (Disable or Modify Tools)
 
-Validates: [DET-011](../../f1-detection-pipeline/docs/detections/det-011-security-log-cleared.md)
+Validates: [DET-011](../flagships/f1-detection-pipeline/docs/detections/det-011-security-log-cleared.md)
 (Wazuh custom 100007, `if_sid 63103`)
 
 ## Commands
@@ -32,7 +32,7 @@ live.
 
 - Custom Wazuh rule 100007 `CTUM: Windows Security event log cleared
   (1102) [T1685.005]`, level 10 — **after** fixing two bugs found during
-  this test (full trail in the det-doc and `../docs/campaign-log.md`):
+  this test (full trail in the det-doc and `../flagships/f2-adversary-ad-lab/docs/campaign-log.md`):
   1. Rule was anchored on `<if_group>windows_security</if_group>`, which
      never matches this event; 1102 actually decodes under stock parent
      `63103`. Fixed to `<if_sid>63103</if_sid>`, verified against

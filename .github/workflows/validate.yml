@@ -3,11 +3,11 @@ name: Validate Sigma rules
 "on":
   push:
     paths:
-      - 'flagships/f1-detection-pipeline/detections/sigma/**'
+      - 'detections/sigma/**'
       - '.github/workflows/validate.yml'
   pull_request:
     paths:
-      - 'flagships/f1-detection-pipeline/detections/sigma/**'
+      - 'detections/sigma/**'
   workflow_dispatch:
 
 jobs:
@@ -30,11 +30,11 @@ jobs:
 
       - name: Validate rules
         run: |
-          sigma check flagships/f1-detection-pipeline/detections/sigma/
+          sigma check detections/sigma/
 
       - name: Convert Sigma to Splunk SPL
         run: |
-          # Excluded from conversion: .../detections/sigma/ssh_success_after_failures.yml
+          # Excluded from conversion: detections/sigma/ssh_success_after_failures.yml
           # uses a temporal_ordered correlation, which the Splunk backend does not
           # support ("Correlation type 'temporal_ordered' is not supported by
           # backend"). It is moved aside so the directory conversion succeeds.
@@ -43,12 +43,12 @@ jobs:
           # for ssh_bruteforce.yml that is the event_count correlation, which is
           # the deployable detection.
           mkdir -p /tmp/sigma-excluded
-          mv flagships/f1-detection-pipeline/detections/sigma/ssh_success_after_failures.yml /tmp/sigma-excluded/
-          rm -f flagships/f1-detection-pipeline/detections/splunk/*.spl
-          sigma convert -t splunk --without-pipeline flagships/f1-detection-pipeline/detections/sigma/ --output-dir flagships/f1-detection-pipeline/detections/splunk/ --output-filename-template "{stem}.spl"
-          mv /tmp/sigma-excluded/ssh_success_after_failures.yml flagships/f1-detection-pipeline/detections/sigma/
+          mv detections/sigma/ssh_success_after_failures.yml /tmp/sigma-excluded/
+          rm -f detections/splunk/*.spl
+          sigma convert -t splunk --without-pipeline detections/sigma/ --output-dir detections/splunk/ --output-filename-template "{stem}.spl"
+          mv /tmp/sigma-excluded/ssh_success_after_failures.yml detections/sigma/
           # Ensure POSIX trailing newlines for clean diffs.
-          for f in flagships/f1-detection-pipeline/detections/splunk/*.spl; do
+          for f in detections/splunk/*.spl; do
             tail -c1 "$f" | read -r _ || echo >> "$f"
           done
 
@@ -60,7 +60,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A flagships/f1-detection-pipeline/detections/splunk/
+          git add -A detections/splunk/
           if git diff --cached --quiet; then
             echo "No SPL changes to commit."
           else

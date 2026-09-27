@@ -24,7 +24,7 @@ in detail.
   table only if the tag isn't present — so restructures like this flow
   through automatically instead of silently mislabeling MITRE fields on
   every future regeneration. See
-  `../flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py` (the
+  `../platform/converters/sigma_to_wazuh.py` (the
   `tactic_of` function and its MITRE table comment) and
   [DET-011](../flagships/f1-detection-pipeline/docs/detections/det-011-security-log-cleared.md).
 
@@ -50,7 +50,7 @@ in detail.
   4.9.0+ and is what this repo's rules use. Worth re-checking on every
   Wazuh upgrade, since anchor behavior like this isn't always called out
   in release notes. See
-  `../flagships/f1-detection-pipeline/converters/README.md` (Caveats).
+  `../platform/converters/README.md` (Caveats).
 - **A rule correctly *not* firing is a valid, worth-documenting outcome.**
   DET-007's pattern list (suspicious service binary paths) is
   threat-model-based, not test-based — Atomic Red Team's own default
@@ -60,7 +60,7 @@ in detail.
   actually representative of the threat; the fix was to make the test
   input realistic (`-PromptForInputArgs`, binary staged under `C:\Temp\`),
   not to loosen the rule. See
-  `../flagships/f2-adversary-ad-lab/attack-tests/t1543-003-service-creation.md`.
+  `../attack-tests/t1543-003-service-creation.md`.
 
 ## Pipeline / CD
 
@@ -88,7 +88,7 @@ in detail.
   the hot-reload lesson above: a CI/CD step should fail loudly the moment
   it can't prove the thing it claims to have done actually happened.
 
-## Operations
+## Telemetry
 
 - **A stale artifact/log file is itself a symptom worth checking before
   chasing a forwarding or decoding theory.** The auditd ingestion gap
@@ -114,6 +114,9 @@ in detail.
   isn't one. See
   `../flagships/f2-adversary-ad-lab/docs/campaign-log.md` ("The in-memory
   cradle lesson").
+
+## ART
+
 - **Installer friction on a hardened default image is expected, budget
   time for it.** Standing up Atomic Red Team on `windows-victim` hit disk
   space limits, PowerShell execution-policy blocks, and confusion between

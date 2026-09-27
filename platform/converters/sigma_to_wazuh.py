@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""Sigma -> Wazuh XML converter for the CTUM detection-lab.
+"""Sigma -> Wazuh XML converter for the CTUM platform.
 
-Converts flagships/f1-detection-pipeline/detections/sigma/*.yml into a
-single Wazuh custom rules file
-(flagships/f1-detection-pipeline/detections/wazuh/custom_rules.xml) with
-stable IDs starting at 100001.
+Converts detections/sigma/*.yml into a single Wazuh custom rules file
+(detections/wazuh/custom_rules.xml) with stable IDs starting at 100001.
 
 Approach adapted from Alanv0303/Rule-converter (MIT): parse multi-doc
 Sigma YAML, translate selections into Wazuh <field>/<match> checks, emit
@@ -14,12 +12,12 @@ mapping, MITRE blocks, event_count correlations via frequency/timeframe,
 and an ID-mapping header comment.
 
 Usage (run from the repo root):
-  python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py
-  python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py \\
-      --sigma-dir flagships/f1-detection-pipeline/detections/sigma \\
-      --output flagships/f1-detection-pipeline/detections/wazuh/custom_rules.xml \\
+  python3 platform/converters/sigma_to_wazuh.py
+  python3 platform/converters/sigma_to_wazuh.py \\
+      --sigma-dir detections/sigma \\
+      --output detections/wazuh/custom_rules.xml \\
       --start-id 100001
-  python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py --anchor if_group   # Wazuh 4.9.0+
+  python3 platform/converters/sigma_to_wazuh.py --anchor if_group   # Wazuh 4.9.0+
 
 Requirements: python3 + pyyaml. No sigma-cli needed.
 
@@ -456,7 +454,7 @@ def render(rules_out, mapping, skipped, start_id):
     lines = []
     lines.append("<!--")
     lines.append("  CTUM detection-lab custom Wazuh rules. GENERATED FILE -- do not")
-    lines.append("  edit by hand; regenerate with: python3 flagships/f1-detection-pipeline/converters/sigma_to_wazuh.py")
+    lines.append("  edit by hand; regenerate with: python3 platform/converters/sigma_to_wazuh.py")
     lines.append(f"  Generated (UTC): {datetime.datetime.now(datetime.timezone.utc):%Y-%m-%d %H:%M}")
     lines.append("  Rule ID <-> Sigma rule mapping:")
     for rid, fname, title in mapping:
@@ -483,8 +481,8 @@ def render(rules_out, mapping, skipped, start_id):
 
 def main():
     ap = argparse.ArgumentParser(description="Convert Sigma rules to Wazuh XML.")
-    ap.add_argument("--sigma-dir", default="flagships/f1-detection-pipeline/detections/sigma")
-    ap.add_argument("--output", default="flagships/f1-detection-pipeline/detections/wazuh/custom_rules.xml")
+    ap.add_argument("--sigma-dir", default="detections/sigma")
+    ap.add_argument("--output", default="detections/wazuh/custom_rules.xml")
     ap.add_argument("--start-id", type=int, default=100001)
     ap.add_argument(
         "--anchor",

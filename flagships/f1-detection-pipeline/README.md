@@ -13,18 +13,21 @@ proven by actually running the attack it's built to catch.
 
 ```text
 f1-detection-pipeline/
-├── detections/
-│   ├── sigma/       ← source of truth (12 rules, Sigma spec v2.1)
-│   ├── wazuh/       ← custom_rules.xml (IDs 100001-100012) + DEPLOY-NOTES.md
-│   └── splunk/      ← CI-generated *.spl (11 files, never hand-edited)
-├── docs/
-│   ├── attack-matrix.md      ← all 12 detections at a glance
-│   ├── detections/           ← one doc per detection (det-001...det-012)
-│   ├── pipeline-demo/        ← DET-012 end-to-end CI/CD walkthrough
-│   └── known-limitations.md  ← open gaps (auditd ingestion, L-001)
-├── converters/      ← sigma_to_wazuh.py + mapping notes
-└── pipelines/       ← Sigma conversion pipeline configs
+└── docs/
+    ├── attack-matrix.md      ← all 12 detections at a glance
+    ├── detections/           ← one doc per detection (det-001...det-012)
+    ├── pipeline-demo/        ← DET-012 end-to-end CI/CD walkthrough
+    └── known-limitations.md  ← open gaps (auditd ingestion, L-001)
 ```
+
+This flagship authors into three platform-level shared resources rather
+than owning them outright — `detections/` (Sigma source of truth, Wazuh
+rules, generated SPL), `platform/converters/` (the Sigma→Wazuh converter),
+and `platform/pipelines/` (Sigma conversion pipeline configs) all live at
+the repo root, since Flagship 2's attack tests validate against the same
+`detections/` tree. Only the write-ups genuinely specific to this
+flagship — the matrix, per-detection docs, the pipeline demo, known
+limitations — live under its own `docs/`.
 
 ## Pipeline
 

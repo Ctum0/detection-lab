@@ -3,7 +3,7 @@
 `custom_rules.xml` is deployed automatically by CI (deploy-wazuh workflow)
 to the Wazuh manager via the API (PUT /rules/files/local_rules.xml), which
 then restarts the manager container — single-node docker does not
-hot-reload rule files on PUT alone (see `../../../../shared/lessons-learned.md`).
+hot-reload rule files on PUT alone (see `../../shared/lessons-learned.md`).
 
 IMPORTANT: keep this file free of XML comments — the Wazuh 4.14 API
 rejects comment blocks containing HTML-escaped entities (&gt; &amp;)
@@ -29,4 +29,4 @@ Skipped: ssh_success_after_failures.yml (temporal_ordered unsupported)
 "log cleared" event decodes under stock parent rule 63103, not the
 generic windows_security group. Fixed to `<if_sid>63103</if_sid>`;
 verified 63103 decodes eventID 1102 before redeploying. Full trail in
-`../../docs/detections/det-011-security-log-cleared.md`.
+`../../flagships/f1-detection-pipeline/docs/detections/det-011-security-log-cleared.md`.

@@ -4,7 +4,7 @@ name: Deploy rules to Wazuh
   push:
     branches: [main]
     paths:
-      - 'flagships/f1-detection-pipeline/detections/wazuh/**'
+      - 'detections/wazuh/**'
   workflow_dispatch:
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/octet-stream" \
             "$WAZUH_API_URL/rules/files/local_rules.xml?overwrite=true" \
-            --data-binary @flagships/f1-detection-pipeline/detections/wazuh/custom_rules.xml)
+            --data-binary @detections/wazuh/custom_rules.xml)
           cat /tmp/deploy_resp.json
           if [ "$HTTP" != "200" ]; then echo "::error::Deploy failed with HTTP $HTTP"; exit 1; fi
           grep -q '"error": 0' /tmp/deploy_resp.json || { echo "::error::Wazuh reported an error"; exit 1; }

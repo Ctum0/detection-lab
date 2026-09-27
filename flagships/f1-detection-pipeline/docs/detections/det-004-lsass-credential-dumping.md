@@ -23,7 +23,7 @@ Run a benign LSASS-handle probe (e.g. Sysinternals `procdump -ma lsass.exe` in t
 
 Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
 (`flagships/f2-adversary-ad-lab/docs/campaign-log.md`,
-`flagships/f2-adversary-ad-lab/attack-tests/t1003-001-lsass-dump.md`): ran
+`attack-tests/t1003-001-lsass-dump.md`): ran
 the Atomic Red Team T1003.001 comsvcs.dll MiniDump test on `windows-victim`
 — `rundll32.exe C:\windows\System32\comsvcs.dll, MiniDump <lsass PID>
 C:\Temp\lsass_dump.dmp full`, dumping LSASS memory via the
