@@ -81,7 +81,7 @@ rule files from a `PUT` alone; a manager restart is required before an
 edited or newly added rule actually starts evaluating events. This
 produced a genuinely confusing debugging session during the Flagship 2
 Workstream 1 close-out: a parent-ID fix to rule 100007 (see
-`../flagships/f1-detection-pipeline/docs/detections/det-011-security-log-cleared.md`)
+`../modules/detection-pipeline/docs/detections/det-011-security-log-cleared.md`)
 looked fully deployed — clean 200, `error: 0` — but the rule still
 wouldn't fire on re-test, because the manager was still running the old
 in-memory rule set. The restart step above was added specifically to
@@ -126,7 +126,7 @@ a throwaway/reviewed file, never the deployed one directly. See
 
 Beyond the hot-reload lesson above, four other issues surfaced while
 building this pipeline (full narrative in
-`../flagships/f1-detection-pipeline/docs/pipeline-demo/README.md`):
+`../modules/detection-pipeline/docs/pipeline-demo/README.md`):
 
 1. **Silent `curl -sk` failures** — covered above.
 2. **Duplicate rule IDs** — a `local_rules.xml.bak-*` file left inside
@@ -146,6 +146,6 @@ building this pipeline (full narrative in
 - `converters/README.md` — Sigma→Wazuh mapping decisions and caveats.
 - `../detections/wazuh/DEPLOY-NOTES.md` — the live rule-ID mapping and
   the comment-free-XML constraint.
-- `../flagships/f1-detection-pipeline/docs/pipeline-demo/` — the DET-012
+- `../modules/detection-pipeline/docs/pipeline-demo/` — the DET-012
   canary proof of the full loop, screenshot by screenshot.
 - `../shared/lessons-learned.md` — Pipeline/CD section, distilled.

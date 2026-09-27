@@ -1,12 +1,12 @@
 # T1543.003 — Windows Service Creation
 
-Validates: [DET-007](../flagships/f1-detection-pipeline/docs/detections/det-007-suspicious-service-creation.md)
+Validates: [DET-007](../modules/detection-pipeline/docs/detections/det-007-suspicious-service-creation.md)
 (Wazuh custom 100011)
 
 ## Commands
 
 Ran the Atomic Red Team T1543.003 test on `windows-victim` (see the ART
-install saga in `../flagships/f2-adversary-ad-lab/docs/campaign-log.md`), twice:
+install saga in `../modules/adversary-emulation/docs/campaign-log.md`), twice:
 
 **Attempt 1 — ART default args (did not fire, by design):**
 

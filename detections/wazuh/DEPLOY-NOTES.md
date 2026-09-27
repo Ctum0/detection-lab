@@ -29,4 +29,4 @@ Skipped: ssh_success_after_failures.yml (temporal_ordered unsupported)
 "log cleared" event decodes under stock parent rule 63103, not the
 generic windows_security group. Fixed to `<if_sid>63103</if_sid>`;
 verified 63103 decodes eventID 1102 before redeploying. Full trail in
-`../../flagships/f1-detection-pipeline/docs/detections/det-011-security-log-cleared.md`.
+`../../modules/detection-pipeline/docs/detections/det-011-security-log-cleared.md`.

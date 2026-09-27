@@ -22,7 +22,7 @@ System EID 7045 with `ServiceName`, `ImagePath` (suspicious location), `ServiceT
 Install a test service pointing at a Temp binary: `sc create LabSvc binPath= "C:\Temp\labtest.exe"`; confirm 7045 and the alert, then `sc delete LabSvc`.
 
 Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
-(`flagships/f2-adversary-ad-lab/docs/campaign-log.md`,
+(`modules/adversary-emulation/docs/campaign-log.md`,
 `attack-tests/t1543-003-service-creation.md`).
 
 First attempt used the Atomic Red Team T1543.003 test with its default

@@ -22,7 +22,7 @@ Security EID 1102 with `SubjectUserName` / `SubjectDomainName` identifying who c
 On the Win10 victim run `wevtutil cl Security` (or Clear-EventLog) as admin; confirm 1102 ships and the rule fires. Re-enable forwarding checks afterwards.
 
 Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
-(`flagships/f2-adversary-ad-lab/docs/campaign-log.md`,
+(`modules/adversary-emulation/docs/campaign-log.md`,
 `attack-tests/t1685-005-log-clearing.md`).
 Two bugs surfaced before this one actually fired:
 

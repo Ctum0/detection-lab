@@ -22,7 +22,7 @@ evidence is indexed in `shared/evidence-index.md`.
 Coverage: 10 distinct techniques across Credential Access, Execution,
 Persistence, Privilege Escalation and Defense Impairment. 9/12 validated —
 ART Workstream 1 (Windows campaign, see
-`../../f2-adversary-ad-lab/docs/campaign-log.md`) closed out DET-003,
+`../../adversary-emulation/docs/campaign-log.md`) closed out DET-003,
 DET-004, DET-007 and DET-011 on 2026-09-27. DET-008/DET-009 remain
 blocked by the auditd ingestion gap (L-001); DET-010 is manual-deployment
 only and was out of scope for W1.

@@ -1,13 +1,13 @@
 # T1003.001 — LSASS Memory (comsvcs.dll MiniDump)
 
-Validates: [DET-004](../flagships/f1-detection-pipeline/docs/detections/det-004-lsass-credential-dumping.md)
+Validates: [DET-004](../modules/detection-pipeline/docs/detections/det-004-lsass-credential-dumping.md)
 (Wazuh custom 100003)
 
 ## Commands
 
 Ran the Atomic Red Team T1003.001 comsvcs.dll MiniDump test on
 `windows-victim` (installed via Invoke-AtomicTest as part of the W1 ART
-install — see `../flagships/f2-adversary-ad-lab/docs/campaign-log.md`):
+install — see `../modules/adversary-emulation/docs/campaign-log.md`):
 
 ```powershell
 Invoke-AtomicTest T1003.001 -TestNumbers <n>
@@ -62,5 +62,5 @@ is a priority gap — see `shared/evidence-index.md`.
 
 First ART-driven test of the W1 close-out after the install saga (disk
 space, execution-policy, installer-script-vs-module issues — see
-`../flagships/f2-adversary-ad-lab/docs/campaign-log.md`). Confirmed the firing process was the planned
+`../modules/adversary-emulation/docs/campaign-log.md`). Confirmed the firing process was the planned
 test, not unexpected activity, before marking VALIDATED.

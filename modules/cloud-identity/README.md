@@ -4,7 +4,7 @@
 
 ## Planned scope
 
-Extend the detection-as-code approach from [Flagship 1](../f1-detection-pipeline/README.md)
+Extend the detection-as-code approach from [Flagship 1](../detection-pipeline/README.md)
 into cloud and identity control planes — the surfaces the on-prem/lab-VM
 model of F1/F2 doesn't cover.
 
@@ -20,6 +20,6 @@ Candidate targets (TBD, pending scoping):
 ## Dependencies
 
 - Builds on the Sigma-as-source-of-truth pipeline and CI patterns proven in
-  [Flagship 1](../f1-detection-pipeline/README.md).
+  [Flagship 1](../detection-pipeline/README.md).
 - No infrastructure stood up yet — see `shared/vm-inventory.md` for planned
   assets.

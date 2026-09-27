@@ -1,6 +1,6 @@
 # T1110.001 — SSH Brute Force (Password Guessing)
 
-Validates: [DET-001](../flagships/f1-detection-pipeline/docs/detections/det-001-ssh-bruteforce.md)
+Validates: [DET-001](../modules/detection-pipeline/docs/detections/det-001-ssh-bruteforce.md)
 (Wazuh stock 5712, custom 100008/100009)
 
 ## Commands

@@ -1,6 +1,6 @@
 # T1136.001 — Local Account Creation
 
-Validates: [DET-005](../flagships/f1-detection-pipeline/docs/detections/det-005-local-user-creation.md)
+Validates: [DET-005](../modules/detection-pipeline/docs/detections/det-005-local-user-creation.md)
 (Wazuh custom 100002)
 
 ## Commands

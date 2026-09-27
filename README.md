@@ -50,11 +50,11 @@ Full platform architecture (network, hosts, remote access) is in
 
 | Flagship | Focus | Status |
 |---|---|---|
-| [F1 — Detection Pipeline](flagships/f1-detection-pipeline/README.md) | Sigma→CI/CD→Wazuh, 12 rules, 9 validated | ✅ COMPLETE |
-| [F2 — Adversary Emulation & AD Lab](flagships/f2-adversary-ad-lab/README.md) | ART campaign, AD domain (planned), purple-team loop | 🔨 W1 COMPLETE |
-| [F3 — Cloud & Identity Security](flagships/f3-cloud-identity/README.md) | Entra ID / AWS monitoring, IaC scanning | ⬜ Not started |
-| [F4 — Analyst SOAR](flagships/f4-soar/README.md) | Enrichment, AI-assisted triage, human-approved response | ⬜ Not started |
-| [F5 — Threat Intel](flagships/f5-threat-intel/README.md) | Honeypots (Cowrie/T-Pot), MISP/OpenCTI, IOC feedback into F1 | ⬜ Not started |
+| [F1 — Detection Pipeline](modules/detection-pipeline/README.md) | Sigma→CI/CD→Wazuh, 12 rules, 9 validated | ✅ COMPLETE |
+| [F2 — Adversary Emulation & AD Lab](modules/adversary-emulation/README.md) | ART campaign, AD domain (planned), purple-team loop | 🔨 W1 COMPLETE |
+| [F3 — Cloud & Identity Security](modules/cloud-identity/README.md) | Entra ID / AWS monitoring, IaC scanning | ⬜ Not started |
+| [F4 — Analyst SOAR](modules/soar/README.md) | Enrichment, AI-assisted triage, human-approved response | ⬜ Not started |
+| [F5 — Threat Intel](modules/threat-intel/README.md) | Honeypots (Cowrie/T-Pot), MISP/OpenCTI, IOC feedback into F1 | ⬜ Not started |
 
 F1's 9/12 (not 10/12) is the actual current count — see Metrics below for
 exactly which three remain untested and why.
@@ -62,7 +62,7 @@ exactly which three remain untested and why.
 ## Platform architecture
 
 ```text
-                    flagships/
+                    modules/
         (F1 complete, F2 W1 complete, F3-F5 not started)
                          |
          each flagship's own docs/ (matrix, campaign
@@ -102,10 +102,10 @@ plugs into what's already here.
    caveats), then push — CD deploys and restarts the manager. Full
    CI/CD mechanics: `platform/workflows-docs.md`.
 4. Add a per-detection doc in
-   `flagships/f1-detection-pipeline/docs/detections/det-NNN-<slug>.md`
+   `modules/detection-pipeline/docs/detections/det-NNN-<slug>.md`
    (template: header table, Logic, Expected telemetry, Validation method,
    FP notes, Investigation guidance) and a row in
-   `flagships/f1-detection-pipeline/docs/attack-matrix.md`.
+   `modules/detection-pipeline/docs/attack-matrix.md`.
 5. Validate it: build a writeup in `attack-tests/`, run the attack,
    capture evidence into `shared/evidence/`, index it in
    `shared/evidence-index.md`, and flip the det-doc + matrix status to
@@ -113,7 +113,7 @@ plugs into what's already here.
 
 ## New flagship
 
-Add a folder under `flagships/` with a `README.md` (purpose, scope,
+Add a folder under `modules/` with a `README.md` (purpose, scope,
 status) and a row in the table above. Nothing else changes — it reads
 from `detections/`, `attack-tests/`, `platform/`, and `shared/` the same
 way F1 and F2 already do.
@@ -121,11 +121,11 @@ way F1 and F2 already do.
 ## Metrics
 
 - **Detections:** 12 (DET-001…DET-012) across 10 ATT&CK techniques — see
-  `flagships/f1-detection-pipeline/docs/attack-matrix.md`
+  `modules/detection-pipeline/docs/attack-matrix.md`
 - **Validated:** 9/12 (DET-001, DET-002, DET-003, DET-004, DET-005,
   DET-006, DET-007, DET-011, DET-012)
 - **Untested:** DET-008/DET-009 — blocked by an auditd ingestion gap (see
-  `flagships/f1-detection-pipeline/docs/known-limitations.md`); DET-010 —
+  `modules/detection-pipeline/docs/known-limitations.md`); DET-010 —
   manual deployment only (temporal correlation, no Wazuh equivalent)
 - **Sigma rules:** 12 files (spec v2.1, `sigma check` clean)
 - **Wazuh rules:** 12 custom rules, IDs 100001–100012
@@ -141,7 +141,7 @@ Telemetry, ART) are in `shared/lessons-learned.md`.
 ```text
 ctum-platform/
 ├── README.md
-├── flagships/
+├── modules/
 │   ├── f1-detection-pipeline/
 │   │   └── docs/                ← attack-matrix, per-detection writeups,
 │   │                               pipeline-demo, known-limitations

@@ -22,7 +22,7 @@ Sysmon EID 1 whose `CommandLine` shows the full cradle, e.g. `IEX (New-Object Ne
 Host a benign text file on the attacker box and run a `DownloadString + IEX` cradle pointing at it from the Win10 victim; confirm the EID 1 and the alert.
 
 Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
-(`flagships/f2-adversary-ad-lab/docs/campaign-log.md`,
+(`modules/adversary-emulation/docs/campaign-log.md`,
 `attack-tests/t1059-001-powershell-cradle.md`):
 ran a `(New-Object Net.WebClient).DownloadString(...)` + `IEX` cradle
 against a benign payload hosted on the attacker box from `windows-victim`.

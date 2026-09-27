@@ -18,7 +18,7 @@ Close the loop from alert to human decision with automation:
 
 ## Dependencies
 
-- Consumes alerts produced by [Flagship 1](../f1-detection-pipeline/README.md)
+- Consumes alerts produced by [Flagship 1](../detection-pipeline/README.md)
   (and eventually F2/F3).
 - No infrastructure stood up yet — see `shared/vm-inventory.md` for planned
   assets (TheHive / MISP / OpenCTI listed as Flagship 4 / TI phase).

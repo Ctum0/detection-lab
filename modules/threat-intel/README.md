@@ -12,10 +12,10 @@ out to a human, IOCs flow back in to seed or tune detections.
   targets, not simulated data.
 - **TIP integration** — MISP/OpenCTI for IOC storage, enrichment, and
   sharing, alongside the case-management work in
-  [Flagship 4](../f4-soar/README.md).
+  [Flagship 4](../soar/README.md).
 - **Feedback into F1** — honeypot/sensor-sourced indicators enriching or
   seeding new Sigma rules in
-  [Flagship 1](../f1-detection-pipeline/README.md)'s `detections/sigma/`,
+  [Flagship 1](../detection-pipeline/README.md)'s `detections/sigma/`,
   same CI/CD path every other detection goes through.
 
 ## Dependencies

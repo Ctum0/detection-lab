@@ -109,7 +109,7 @@ Full detail per row: `docs/attack-matrix.md`. Per-detection writeups
 
 ## Related
 
-- [Flagship 2](../f2-adversary-ad-lab/README.md) — the attack side that
+- [Flagship 2](../adversary-emulation/README.md) — the attack side that
   validates these detections (ART campaigns, per-technique writeups)
 - `shared/architecture.md` — platform-wide data flow
 - `shared/lessons-learned.md` — distilled lessons from building this

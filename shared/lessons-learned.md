@@ -1,7 +1,7 @@
 # Lessons Learned
 
-Distilled lessons from building [Flagship 1](../flagships/f1-detection-pipeline/README.md)
-(detection pipeline) and [Flagship 2](../flagships/f2-adversary-ad-lab/README.md)
+Distilled lessons from building [Flagship 1](../modules/detection-pipeline/README.md)
+(detection pipeline) and [Flagship 2](../modules/adversary-emulation/README.md)
 (ART-driven validation), grouped by area. Each entry links back to the
 detection doc, campaign log or pipeline-demo writeup where it was found
 in detail.
@@ -26,7 +26,7 @@ in detail.
   every future regeneration. See
   `../platform/converters/sigma_to_wazuh.py` (the
   `tactic_of` function and its MITRE table comment) and
-  [DET-011](../flagships/f1-detection-pipeline/docs/detections/det-011-security-log-cleared.md).
+  [DET-011](../modules/detection-pipeline/docs/detections/det-011-security-log-cleared.md).
 
 ## Wazuh rules
 
@@ -42,8 +42,8 @@ in detail.
   and confirm the actual parent SID before anchoring any new rule on
   `if_sid`/`if_group`**, rather than inferring the parent from what seems
   plausible. See
-  `../flagships/f1-detection-pipeline/docs/detections/det-011-security-log-cleared.md`
-  and `../flagships/f2-adversary-ad-lab/docs/campaign-log.md`.
+  `../modules/detection-pipeline/docs/detections/det-011-security-log-cleared.md`
+  and `../modules/adversary-emulation/docs/campaign-log.md`.
 - **Sysmon anchoring is version-sensitive.** Wazuh 4.9.0 broke `if_sid`
   chaining off level-0 Sysmon parents at runtime (wazuh/wazuh#36029) —
   `if_group` (`sysmon_event1` / `sysmon_event_10`) is the robust anchor on
@@ -78,7 +78,7 @@ in detail.
   written, not that the running system picked it up** — verify the
   runtime, not just the API response, whenever a deploy step's job is to
   change live behavior. See
-  `../flagships/f1-detection-pipeline/docs/pipeline-demo/README.md`
+  `../modules/detection-pipeline/docs/pipeline-demo/README.md`
   (debugging war story) and `.github/workflows/deploy-wazuh.yml`.
 - **Silent-success failure modes are worse than loud failures.** The
   original deploy step used `curl -sk`, which swallows HTTP errors and
@@ -101,7 +101,7 @@ in detail.
   thread were preventing a clean in-place recovery. **Check whether the
   producer is even alive and its output is current before investigating
   the pipe.** See
-  `../flagships/f1-detection-pipeline/docs/known-limitations.md` (L-001).
+  `../modules/detection-pipeline/docs/known-limitations.md` (L-001).
 - **A downstream execution boundary can be inherent to a technique, not a
   gap in logging coverage.** The PowerShell download-cradle test
   (T1059.001, DET-003) fetches and executes its payload entirely
@@ -112,7 +112,7 @@ in detail.
   explicitly in the detection's own documentation rather than assuming
   "another control will catch it" — for this technique, there usually
   isn't one. See
-  `../flagships/f2-adversary-ad-lab/docs/campaign-log.md` ("The in-memory
+  `../modules/adversary-emulation/docs/campaign-log.md` ("The in-memory
   cradle lesson").
 
 ## ART
@@ -123,5 +123,5 @@ in detail.
   the bootstrap installer script and the `Invoke-AtomicRedTeam` module it
   installs — none of which are ART bugs, all of which cost real
   debugging time on a first install. See
-  `../flagships/f2-adversary-ad-lab/docs/campaign-log.md` ("The ART
+  `../modules/adversary-emulation/docs/campaign-log.md` ("The ART
   install saga").

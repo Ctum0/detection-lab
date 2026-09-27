@@ -22,7 +22,7 @@ Sysmon EID 10 with `SourceImage` = dumping tool, `TargetImage` = `C:\Windows\sys
 Run a benign LSASS-handle probe (e.g. Sysinternals `procdump -ma lsass.exe` in test mode, or Atomic Red Team T1003.001 test) on the Win10 victim; confirm EID 10 and the alert. Coordinate first — AV/EDR may block.
 
 Validated 2026-09-27 as part of the Flagship 2 Workstream 1 ART campaign
-(`flagships/f2-adversary-ad-lab/docs/campaign-log.md`,
+(`modules/adversary-emulation/docs/campaign-log.md`,
 `attack-tests/t1003-001-lsass-dump.md`): ran
 the Atomic Red Team T1003.001 comsvcs.dll MiniDump test on `windows-victim`
 — `rundll32.exe C:\windows\System32\comsvcs.dll, MiniDump <lsass PID>

@@ -3,7 +3,7 @@
 Chronological log of the Flagship 2 Workstream 1 close-out: standing up
 Atomic Red Team on `windows-victim` and running it through the
 Windows-side custom Wazuh rules that were sitting UNTESTED in the
-[Flagship 1 attack matrix](../../f1-detection-pipeline/docs/attack-matrix.md).
+[Flagship 1 attack matrix](../../detection-pipeline/docs/attack-matrix.md).
 Per-technique detail lives in `../attack-tests/`; this log is the
 narrative — what was tried, what broke, in what order.
 
@@ -91,7 +91,7 @@ group. In fact EventID 1102 decodes under the specific stock parent rule
 error, just no alerts, which took longer to notice than a hard failure
 would have. Fixed to `<if_sid>63103</if_sid>`, verified with
 `wazuh-logtest` before redeploying. Full detail:
-`../../f1-detection-pipeline/docs/detections/det-011-security-log-cleared.md`.
+`../../detection-pipeline/docs/detections/det-011-security-log-cleared.md`.
 
 ### 2. Rule-parenting assumption #2 — same family as #1
 
@@ -136,4 +136,4 @@ VALIDATED this session (DET-003, DET-004, DET-007, DET-011), bringing the
 Flagship 1 matrix to 9/12. DET-008/DET-009 (Linux/auditd) remain
 untested, blocked upstream by the auditd ingestion gap — not an ART or
 campaign issue, see
-`../../f1-detection-pipeline/docs/known-limitations.md` L-001.
+`../../detection-pipeline/docs/known-limitations.md` L-001.

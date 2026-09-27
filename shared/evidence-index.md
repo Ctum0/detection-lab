@@ -9,7 +9,7 @@ tests, rule firings); the Source column maps each one to its
 `shared/evidence/` target name. Views: **attack** = attacker/victim
 terminal doing the thing; **SIEM** = Wazuh alert/event view proving
 detection. The end-to-end CI/CD demo (DET-012) lives separately in
-`flagships/f1-detection-pipeline/docs/pipeline-demo/`.
+`modules/detection-pipeline/docs/pipeline-demo/`.
 
 ## Lab + SIEM overview (supporting)
 

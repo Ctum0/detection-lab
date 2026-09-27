@@ -47,7 +47,7 @@ Hand-review deltas currently in `custom_rules.xml` (keep on regenerate):
 - Security rules chain stock parents where stable: 100002 under 60109,
   100006 under 60228; 100007 uses `if_sid` on `63103` (event-log-cleared
   parent, not `windows_security` — see
-  `flagships/f1-detection-pipeline/docs/known-limitations.md` /
+  `modules/detection-pipeline/docs/known-limitations.md` /
   `shared/lessons-learned.md` for why); 100011 uses `windows_system` group.
 
 - Sigma `Image|CommandLine|TargetImage|...` → `win.eventdata.*` equivalents;
@@ -70,7 +70,7 @@ Hand-review deltas currently in `custom_rules.xml` (keep on regenerate):
 3. Tune: the sshd `full_log` match is intentionally broad — narrow to
    decoded fields once baselined. (Auditd rules already use decoded
    `audit.command` / `audit.args`, which is why the ingestion gap in
-   `flagships/f1-detection-pipeline/docs/known-limitations.md` blocks
+   `modules/detection-pipeline/docs/known-limitations.md` blocks
    them.)
 
 ## Caveats
