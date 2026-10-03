@@ -127,12 +127,12 @@ Seven stacked issues, including two of my own mistakes. Distilled
 SOAR-specific lessons are in
 [`shared/lessons-learned.md`](../../shared/lessons-learned.md#soar-build-lessons-module-4).
 
-## Verification status
+## Verification
 
-- **Severity filter.** The filter was corrected from `body.severity` (Shuffle's
-  category, which reads 3 on a level-15 alert) to the Wazuh level. The
-  workflow change is live. End-to-end validation with one real attack under
-  the corrected filter is still to be run.
+- **Severity filter.** The filter gates on the Wazuh level, `body.all_fields.rule.level >= 8`.
+  Validated end to end with a real attack: one Telegram message for a level-10 alert (rule 100005),
+  and no message for level-3 noise. The filter was first written against `body.severity`, which is
+  Shuffle's category rather than the Wazuh level. That mistake is in the war story.
 
 ## Re-importing the workflow
 
