@@ -38,6 +38,9 @@ The lab runs on a private network. Victims and the hypervisor sit on a
 home LAN, and remote administration and telemetry traverse a private
 overlay network. Addresses are not published here.
 
+Wazuh manager agent ports are bound to the Tailscale interface only; the API
+is loopback-only.
+
 ## Components
 
 | Component | Technology | Host |

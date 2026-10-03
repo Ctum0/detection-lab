@@ -120,27 +120,25 @@ UNTESTED — BLOCKED, not VALIDATED. They are not claimed to work.
 
 ---
 
-## L-002: built-in rule 92213 fires on PowerShell policy-test artefacts (open)
+## L-002: built-in rule 92213 fires on PowerShell policy-test artefacts (resolved)
 
 PowerShell writes `__PSScriptPolicyTest_*.ps1` files into the user's Temp
-directory on every session start. Wazuh's built-in Temp-drop rule (92213,
-"Executable dropped in Windows root folder" / script-in-Temp variant) fires
-on each one. The result is hundreds of alerts per day that carry no signal.
+directory on every session start. Wazuh's built-in Temp-drop rule (92213)
+fires on each one, which produced hundreds of alerts per day with no signal.
 
-**Fix identified:** exclude `__PSScriptPolicyTest` in the rule, or downlevel
-`.ps1` files written to Temp to level 3. Either change is a rule edit.
+**Resolution:** rule 100020, a level-0 child of 92213, matches the
+`__PSScriptPolicyTest_*.ps1` filename and suppresses the alert.
 
-**Status:** open. The fix is identified but not yet applied. It needs a
-manager restart to take effect.
+**Result:** before the rule, hundreds of 92213 alerts per day from this
+source; after it, zero. Genuine Temp-drop detections were unaffected.
 
 ---
 
-## L-003: stray `local_rules.xml.bak` in the rules directory (open)
+## L-003: stray `local_rules.xml.bak` in the rules directory (resolved)
 
-A backup file `local_rules.xml.bak` sits inside `/var/ossec/etc/rules/`.
-`analysisd` loads every XML file in that directory, so the backup can
-redefine custom rules alongside the live file. This is the same class of
+A backup file `local_rules.xml.bak` sat inside `/var/ossec/etc/rules/`.
+`analysisd` loads every XML file in that directory, so the backup could
+redefine custom rules alongside the live file. It was the same class of
 problem as the duplicate-rule-ID bug in the pipeline demo.
 
-**Status:** open. Moving the file out is safe. It takes effect after a
-manager restart.
+**Resolution:** the backup file was removed from the rules directory.
