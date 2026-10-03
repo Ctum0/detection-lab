@@ -1,0 +1,656 @@
+{
+  "updatedAt": "2026-10-03T19:15:05.954Z",
+  "createdAt": "2026-10-03T11:03:13.896Z",
+  "id": "JZZ3TrGbgKEnV1Rp",
+  "name": "SOC Alert Triage",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wazuh-alerts",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "Wazuh Alert Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "wazuh-alerts"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.severity }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-1",
+      "name": "Severity Filter",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst body = item.body ?? item;\nconst all  = body.all_fields ?? {};\nconst rule = all.rule ?? {};\nconst agent= all.agent ?? {};\nconst data = all.data  ?? {};\n\nconst rule_id    = rule.id || body.rule_id || '';\nconst rule_desc  = rule.description || body.title || body.rule_desc || '';\nconst level      = rule.level || body.level || 0;\nconst agent_name = agent.name || body.agent_name || 'unknown';\nconst mitre_str  = JSON.stringify(rule.mitre || body.mitre || {});\nconst timestamp  = all.timestamp || body.timestamp || '';\nconst alert_id   = String(body.id || all.id || (rule_id + '|' + timestamp));\n// Dedup key: rule_id + minute bucket (same alert double-posted = same minute; new attack later = new minute)\nconst minuteBucket = String(timestamp).slice(0, 16); // YYYY-MM-DDTHH:MM\nconst dedup_key  = rule_id + '|' + minuteBucket;\nconst raw_dt     = JSON.stringify(all).slice(0, 2500);\n\nreturn [{\n  json: {\n    rule_id,\n    rule_desc,\n    level: Number(level) || 0,\n    agent_name,\n    mitre: mitre_str,\n    timestamp,\n    alert_id,\n    dedup_key,\n    src_ip:      (data.srcip || data.src_ip || ''),\n    dst_ip:      (data.dstip || data.dst_ip || ''),\n    file_hash:   (data.syscheck?.md5_after || data.file?.md5 || data.md5 || data.sha256 || data.hash || ''),\n    url_or_domain: (data.hostname || data.domain || data.url || ''),\n    raw: raw_dt\n  }\n}];"
+      },
+      "id": "parse-1",
+      "name": "Parse Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.dedup_key }}",
+        "options": {
+          "historySize": 5000
+        }
+      },
+      "id": "dedup-atomic",
+      "name": "Dedup (2min)",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.abuseipdb.com/api/v2/check?ipAddress={{ $json.src_ip }}&maxAgeInDays=90",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Key",
+              "value": "REDACTED"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "abuse-1",
+      "name": "AbuseIPDB Enrichment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Runs ONCE - pulls both sources itself (no multi-branch input bug)\nconst base = $('Parse Alert').first().json;\nlet abuse = null;\ntry { abuse = $('AbuseIPDB Enrichment').first().json?.data ?? null; } catch(e) {}\n\nconst llmBody = {\n  model: \"Hermes Agent\",\n  messages: [\n    { role: \"system\", content: \"You are a senior SOC analyst. Write a concise triage in PLAIN TEXT only (no markdown, no asterisks, no backticks) with these sections: WHAT HAPPENED, TECHNIQUE, SEVERITY, NEXT STEPS, FP LIKELIHOOD. Max 200 words. Be direct.\" },\n    { role: \"user\", content: \"ALERT: \" + (base.rule_desc || 'unknown') + \" | RULE: \" + base.rule_id + \" | LEVEL: \" + base.level + \" | AGENT: \" + base.agent_name + \" | MITRE: \" + (base.mitre || 'none') + \" | SRC IP: \" + (base.src_ip || 'none') + \" | HASH: \" + (base.file_hash || 'none') + \" | ENRICHMENT: \" + (abuse ? JSON.stringify(abuse).slice(0,400) : 'none') }\n  ]\n};\n\nreturn [{ json: { ...base, enrichment: abuse, llm_body: JSON.stringify(llmBody) } }];"
+      },
+      "id": "merge-1",
+      "name": "Merge",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.2.3:4000/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.llm_body }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "llm-1",
+      "name": "AI Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1324,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ai = $input.first().json;\nconst base = $('Parse Alert').first().json;\n\n// Extract LLM content\nlet summary = '';\ntry { summary = ai.choices[0].message.content || ''; } catch(e) {}\nif (!summary) summary = 'Summary unavailable';\n\n// --- Markdown -> plain text (strip ** __ ` # and stray artifacts) ---\nsummary = summary\n  .replace(/\\*\\*?/g, '')          // bold/italic asterisks\n  .replace(/__/g, '')              // underscores emphasis\n  .replace(/`{1,3}/g, '')          // code ticks\n  .replace(/^#+\\s*/gm, '')         // markdown headers\n  .replace(/^\\s*[-*]\\s+/gm, '  • ')  // bullets -> dots\n  .replace(/\\n{3,}/g, '\\n\\n')     // collapse blank lines\n  .trim();\n\n// Truncate overly long summaries (Telegram 4096 char limit, keep room for header)\nif (summary.length > 2800) summary = summary.slice(0, 2800) + '\\n… (truncated)';\n\n// --- Clean header fields ---\nconst desc = (base.rule_desc || 'Unknown alert').replace(/^[^:]{0,30}:\\s*/, '').trim();\n\nlet mitre = 'none';\ntry {\n  const m = JSON.parse(base.mitre || '{}');\n  const ids = m.id || [];\n  const tactics = m.tactic || [];\n  if (ids.length) mitre = ids.map((t,i)=> t + (tactics[i] ? ' ('+tactics[i]+')' : '')).join(', ');\n} catch(e) {}\n\nconst esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n\nconst msg = [\n  '<b>🚨 SOC ALERT</b>',\n  '<i>' + esc(desc) + '</i>',\n  '',\n  '<b>Rule:</b> ' + esc(base.rule_id) + '   <b>Level:</b> ' + esc(base.level),\n  '<b>Host:</b> ' + esc(base.agent_name),\n  '<b>MITRE:</b> ' + esc(mitre),\n  '<b>Time:</b> ' + esc(base.timestamp),\n  '',\n  '<b>🤖 AI Triage</b>',\n  esc(summary)\n].join('\\n');\n\nreturn [{ json: { chat_id: 'REDACTED', text: msg } }];"
+      },
+      "id": "format-1",
+      "name": "Format Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/botREDACTED/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: REDACTED, text: $json.text, parse_mode: 'HTML' }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "tg-1",
+      "name": "Telegram Notify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Wazuh Alert Webhook": {
+      "main": [
+        [
+          {
+            "node": "Severity Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Severity Filter": {
+      "main": [
+        [
+          {
+            "node": "Parse Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Alert": {
+      "main": [
+        [
+          {
+            "node": "Dedup (2min)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup (2min)": {
+      "main": [
+        [
+          {
+            "node": "AbuseIPDB Enrichment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AbuseIPDB Enrichment": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Analysis": {
+      "main": [
+        [
+          {
+            "node": "Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Message": {
+      "main": [
+        [
+          {
+            "node": "Telegram Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Notify": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": {
+    "global": {
+      "cache": {}
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "versionId": "9fe29b12-8f0a-4a65-b41a-09edb0f3eabb",
+  "activeVersionId": "9fe29b12-8f0a-4a65-b41a-09edb0f3eabb",
+  "versionCounter": 47,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-10-03T11:03:13.905Z",
+      "createdAt": "2026-10-03T11:03:13.905Z",
+      "role": "workflow:owner",
+      "workflowId": "JZZ3TrGbgKEnV1Rp",
+      "projectId": "uRcPs7UYVTV8LUqM",
+      "project": {
+        "updatedAt": "2026-08-18T04:16:37.363Z",
+        "createdAt": "2026-08-18T04:12:39.969Z",
+        "id": "uRcPs7UYVTV8LUqM",
+        "name": "Sithum Ranasinghe <sithumsryt@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "b65f2f17-e756-4b42-847f-d5f12047631e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-10-03T19:15:05.955Z",
+    "createdAt": "2026-10-03T19:15:05.955Z",
+    "versionId": "9fe29b12-8f0a-4a65-b41a-09edb0f3eabb",
+    "workflowId": "JZZ3TrGbgKEnV1Rp",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "wazuh-alerts",
+          "options": {}
+        },
+        "id": "webhook-1",
+        "name": "Wazuh Alert Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "wazuh-alerts"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $json.body.severity }}",
+                "rightValue": 3,
+                "operator": {
+                  "type": "number",
+                  "operation": "gte"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "filter-1",
+        "name": "Severity Filter",
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2,
+        "position": [
+          224,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const item = $input.first().json;\nconst body = item.body ?? item;\nconst all  = body.all_fields ?? {};\nconst rule = all.rule ?? {};\nconst agent= all.agent ?? {};\nconst data = all.data  ?? {};\n\nconst rule_id    = rule.id || body.rule_id || '';\nconst rule_desc  = rule.description || body.title || body.rule_desc || '';\nconst level      = rule.level || body.level || 0;\nconst agent_name = agent.name || body.agent_name || 'unknown';\nconst mitre_str  = JSON.stringify(rule.mitre || body.mitre || {});\nconst timestamp  = all.timestamp || body.timestamp || '';\nconst alert_id   = String(body.id || all.id || (rule_id + '|' + timestamp));\n// Dedup key: rule_id + minute bucket (same alert double-posted = same minute; new attack later = new minute)\nconst minuteBucket = String(timestamp).slice(0, 16); // YYYY-MM-DDTHH:MM\nconst dedup_key  = rule_id + '|' + minuteBucket;\nconst raw_dt     = JSON.stringify(all).slice(0, 2500);\n\nreturn [{\n  json: {\n    rule_id,\n    rule_desc,\n    level: Number(level) || 0,\n    agent_name,\n    mitre: mitre_str,\n    timestamp,\n    alert_id,\n    dedup_key,\n    src_ip:      (data.srcip || data.src_ip || ''),\n    dst_ip:      (data.dstip || data.dst_ip || ''),\n    file_hash:   (data.syscheck?.md5_after || data.file?.md5 || data.md5 || data.sha256 || data.hash || ''),\n    url_or_domain: (data.hostname || data.domain || data.url || ''),\n    raw: raw_dt\n  }\n}];"
+        },
+        "id": "parse-1",
+        "name": "Parse Alert",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          448,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "removeItemsSeenInPreviousExecutions",
+          "dedupeValue": "={{ $json.dedup_key }}",
+          "options": {
+            "historySize": 5000
+          }
+        },
+        "id": "dedup-atomic",
+        "name": "Dedup (2min)",
+        "type": "n8n-nodes-base.removeDuplicates",
+        "typeVersion": 2,
+        "position": [
+          672,
+          0
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "=https://api.abuseipdb.com/api/v2/check?ipAddress={{ $json.src_ip }}&maxAgeInDays=90",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Key",
+                "value": "REDACTED"
+              },
+              {
+                "name": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "id": "abuse-1",
+        "name": "AbuseIPDB Enrichment",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          880,
+          -192
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Runs ONCE - pulls both sources itself (no multi-branch input bug)\nconst base = $('Parse Alert').first().json;\nlet abuse = null;\ntry { abuse = $('AbuseIPDB Enrichment').first().json?.data ?? null; } catch(e) {}\n\nconst llmBody = {\n  model: \"Hermes Agent\",\n  messages: [\n    { role: \"system\", content: \"You are a senior SOC analyst. Write a concise triage in PLAIN TEXT only (no markdown, no asterisks, no backticks) with these sections: WHAT HAPPENED, TECHNIQUE, SEVERITY, NEXT STEPS, FP LIKELIHOOD. Max 200 words. Be direct.\" },\n    { role: \"user\", content: \"ALERT: \" + (base.rule_desc || 'unknown') + \" | RULE: \" + base.rule_id + \" | LEVEL: \" + base.level + \" | AGENT: \" + base.agent_name + \" | MITRE: \" + (base.mitre || 'none') + \" | SRC IP: \" + (base.src_ip || 'none') + \" | HASH: \" + (base.file_hash || 'none') + \" | ENRICHMENT: \" + (abuse ? JSON.stringify(abuse).slice(0,400) : 'none') }\n  ]\n};\n\nreturn [{ json: { ...base, enrichment: abuse, llm_body: JSON.stringify(llmBody) } }];"
+        },
+        "id": "merge-1",
+        "name": "Merge",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1104,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://10.0.2.3:4000/v1/chat/completions",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer REDACTED"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.llm_body }}",
+          "options": {
+            "timeout": 300000
+          }
+        },
+        "id": "llm-1",
+        "name": "AI Analysis",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1324,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const ai = $input.first().json;\nconst base = $('Parse Alert').first().json;\n\n// Extract LLM content\nlet summary = '';\ntry { summary = ai.choices[0].message.content || ''; } catch(e) {}\nif (!summary) summary = 'Summary unavailable';\n\n// --- Markdown -> plain text (strip ** __ ` # and stray artifacts) ---\nsummary = summary\n  .replace(/\\*\\*?/g, '')          // bold/italic asterisks\n  .replace(/__/g, '')              // underscores emphasis\n  .replace(/`{1,3}/g, '')          // code ticks\n  .replace(/^#+\\s*/gm, '')         // markdown headers\n  .replace(/^\\s*[-*]\\s+/gm, '  • ')  // bullets -> dots\n  .replace(/\\n{3,}/g, '\\n\\n')     // collapse blank lines\n  .trim();\n\n// Truncate overly long summaries (Telegram 4096 char limit, keep room for header)\nif (summary.length > 2800) summary = summary.slice(0, 2800) + '\\n… (truncated)';\n\n// --- Clean header fields ---\nconst desc = (base.rule_desc || 'Unknown alert').replace(/^[^:]{0,30}:\\s*/, '').trim();\n\nlet mitre = 'none';\ntry {\n  const m = JSON.parse(base.mitre || '{}');\n  const ids = m.id || [];\n  const tactics = m.tactic || [];\n  if (ids.length) mitre = ids.map((t,i)=> t + (tactics[i] ? ' ('+tactics[i]+')' : '')).join(', ');\n} catch(e) {}\n\nconst esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n\nconst msg = [\n  '<b>🚨 SOC ALERT</b>',\n  '<i>' + esc(desc) + '</i>',\n  '',\n  '<b>Rule:</b> ' + esc(base.rule_id) + '   <b>Level:</b> ' + esc(base.level),\n  '<b>Host:</b> ' + esc(base.agent_name),\n  '<b>MITRE:</b> ' + esc(mitre),\n  '<b>Time:</b> ' + esc(base.timestamp),\n  '',\n  '<b>🤖 AI Triage</b>',\n  esc(summary)\n].join('\\n');\n\nreturn [{ json: { chat_id: 'REDACTED', text: msg } }];"
+        },
+        "id": "format-1",
+        "name": "Format Message",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1552,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "=https://api.telegram.org/botREDACTED/sendMessage",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ chat_id: REDACTED, text: $json.text, parse_mode: 'HTML' }) }}",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "id": "tg-1",
+        "name": "Telegram Notify",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1760,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Wazuh Alert Webhook": {
+        "main": [
+          [
+            {
+              "node": "Severity Filter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Severity Filter": {
+        "main": [
+          [
+            {
+              "node": "Parse Alert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Alert": {
+        "main": [
+          [
+            {
+              "node": "Dedup (2min)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dedup (2min)": {
+        "main": [
+          [
+            {
+              "node": "AbuseIPDB Enrichment",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AbuseIPDB Enrichment": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge": {
+        "main": [
+          [
+            {
+              "node": "AI Analysis",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Analysis": {
+        "main": [
+          [
+            {
+              "node": "Format Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Message": {
+        "main": [
+          [
+            {
+              "node": "Telegram Notify",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Telegram Notify": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Sithum Ranasinghe",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-10-03T19:15:06.144Z",
+        "id": 131,
+        "workflowId": "JZZ3TrGbgKEnV1Rp",
+        "versionId": "9fe29b12-8f0a-4a65-b41a-09edb0f3eabb",
+        "event": "activated",
+        "userId": "b65f2f17-e756-4b42-847f-d5f12047631e"
+      }
+    ]
+  }
+}
