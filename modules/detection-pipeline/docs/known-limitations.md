@@ -132,6 +132,8 @@ fires on each one, which produced hundreds of alerts per day with no signal.
 **Result:** before the rule, hundreds of 92213 alerts per day from this
 source; after it, zero. Genuine Temp-drop detections were unaffected.
 
+The rule and its reasoning are in `docs/tuning/fp-suppressions.md`.
+
 ---
 
 ## L-003: stray `local_rules.xml.bak` in the rules directory (resolved)

@@ -44,6 +44,9 @@ stock-92900 FP-case screenshot is on file. Planned captures are listed in
 
 Endpoint security products legitimately open LSASS handles; baseline `SourceImage` values and exclude signed security tooling only.
 
+The benign LSM path that produces stock rule 92900 is suppressed by rule 100013, which
+matches `GrantedAccess 0x101001` with an `lsm.dll` call trace. See `docs/tuning/fp-suppressions.md`.
+
 ## Investigation guidance
 
 1. What is `SourceImage` — signed? Known tool? Check hash/VT.

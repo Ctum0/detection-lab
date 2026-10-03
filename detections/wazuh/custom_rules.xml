@@ -115,7 +115,6 @@
     </mitre>
   </rule>
 
-
   <rule id="100012" level="3">
     <if_group>sysmon_event1</if_group>
     <field name="win.eventdata.image" type="pcre2">(?i)\\notepad\.exe$</field>
@@ -123,5 +122,19 @@
     <mitre>
       <id>T1098</id>
     </mitre>
+  </rule>
+  <rule id="100013" level="0">
+    <if_sid>92900</if_sid>
+    <field name="win.eventdata.grantedAccess" type="pcre2">(?i)^0x101001$</field>
+    <field name="win.eventdata.callTrace" type="pcre2">(?i)lsm\.dll</field>
+    <description>LSASS access via lsm.dll with non-read GrantedAccess 0x101001 - benign Windows LSM path (FP for 92900)</description>
+    <mitre>
+      <id>T1003.001</id>
+    </mitre>
+  </rule>
+  <rule id="100020" level="0">
+    <if_sid>92213</if_sid>
+    <field name="win.eventdata.targetFilename" type="pcre2">(?i)__PSScriptPolicyTest_[a-z0-9]+\.[a-z0-9]+\.ps1</field>
+    <description>Detection Platform tuning: PowerShell script policy test file - benign, excluded from 92213</description>
   </rule>
 </group>

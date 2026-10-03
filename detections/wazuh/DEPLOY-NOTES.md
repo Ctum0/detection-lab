@@ -22,6 +22,8 @@ Rule ID <-> Sigma rule mapping:
   100010 <-> suid_privilege_escalation.yml (auditd)
   100011 <-> suspicious_service_creation.yml (7045) — VALIDATED firing
   100012 <-> notepad_execution.yml (Sysmon EID1, CI/CD canary) — VALIDATED firing
+  100013 <-> lsass 92900 FP suppression (level 0, LSM path) — see docs/tuning/fp-suppressions.md
+  100020 <-> 92213 FP suppression (level 0, PowerShell policy test files) — see docs/tuning/fp-suppressions.md
 Skipped: ssh_success_after_failures.yml (temporal_ordered unsupported)
 
 100007 parent fix (2026-09-27): originally anchored on
