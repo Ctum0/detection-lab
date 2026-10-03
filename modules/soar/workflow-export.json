@@ -136,7 +136,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://10.0.2.3:4000/v1/chat/completions",
+        "url": "http://<litellm-host>:4000/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -329,7 +329,7 @@
         "updatedAt": "2026-08-18T04:16:37.363Z",
         "createdAt": "2026-08-18T04:12:39.969Z",
         "id": "uRcPs7UYVTV8LUqM",
-        "name": "Sithum Ranasinghe <sithumsryt@gmail.com>",
+        "name": "REDACTED",
         "type": "personal",
         "icon": null,
         "description": null,
@@ -474,7 +474,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "http://10.0.2.3:4000/v1/chat/completions",
+          "url": "http://<litellm-host>:4000/v1/chat/completions",
           "sendHeaders": true,
           "headerParameters": {
             "parameters": [

@@ -8,7 +8,7 @@ Validates: [DET-001](../modules/detection-pipeline/docs/detections/det-001-ssh-b
 Run from the Parrot attacker box against `linux-victim`:
 
 ```bash
-hydra -l nonexistentuser -P rockyou.txt -t 4 192.168.1.112 ssh
+hydra -l nonexistentuser -P rockyou.txt -t 4 <victim-ip> ssh
 ```
 
 ## Expected telemetry

@@ -1,6 +1,6 @@
 # SOAR & Automated Response
 
-**Status: ✅ COMPLETE** — live end to end on `n8n.ctum.org`.
+**Status: ✅ COMPLETE** — live end to end.
 
 Wazuh alerts flow into an n8n workflow that filters, deduplicates,
 enriches, asks an LLM for a short triage, and sends the result to Telegram.
@@ -76,7 +76,7 @@ spent in the AI step.
 ```xml
 <integration>
   <name>shuffle</name>
-  <hook_url>https://n8n.ctum.org/webhook/wazuh-alerts</hook_url>
+  <hook_url>https://<your-n8n-host>/webhook/wazuh-alerts</hook_url>
   <level>8</level>
   <alert_format>json</alert_format>
 </integration>
@@ -127,7 +127,7 @@ Seven stacked issues, including two of my own mistakes. Distilled
 SOAR-specific lessons are in
 [`shared/lessons-learned.md`](../../shared/lessons-learned.md#soar-build-lessons-module-4).
 
-## Open items before publishing
+## Known issues
 
 - **Severity threshold.** The brief calls for level ≥ 8. The live filter
   checks `body.severity >= 3`, which is Shuffle's category, not the Wazuh
@@ -135,7 +135,7 @@ SOAR-specific lessons are in
   `body.severity = 3`. Changing the filter to `body.severity >= 8` would drop
   every alert. The correct check is `body.all_fields.rule.level >= 8`, which
   reads the same value Parse Alert uses. Not yet applied to the live workflow;
-  awaiting confirmation.
+  not yet applied to the live workflow.
 - **Node naming.** `Dedup (2min)` should be renamed to match its real
   behaviour.
 

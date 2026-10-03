@@ -104,7 +104,7 @@ dashboard; see `../shared/architecture.md`). That's a deliberate choice,
 not an accident of setup: the deploy step talks to `localhost:55000`
 directly, so there's no public-facing Wazuh API port to secure or VPN
 tunnel to maintain just for CI. The API credentials live in a file on
-that host (`WAZUH_API_PASS_FILE=/home/ctum/.wazuh-api-pass`), outside the
+that host (a path set by `WAZUH_API_PASS_FILE`), outside the
 repo and outside GitHub Secrets — the runner already has local
 filesystem access, so there's no reason to duplicate the credential into
 another store.

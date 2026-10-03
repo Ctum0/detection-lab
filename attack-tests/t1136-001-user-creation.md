@@ -5,7 +5,7 @@ Validates: [DET-005](../modules/detection-pipeline/docs/detections/det-005-local
 
 ## Commands
 
-Run as admin on `windows-victim` (`DESKTOP-2R9UM3Q`):
+Run as admin on `windows-victim`:
 
 ```powershell
 net user backdoor P@ssw0rd123 /add
@@ -21,7 +21,7 @@ Security EID 4720 (`A user account was created`) with `TargetUserName` =
 - Stock 60109 `User account enabled or created`.
 - Stock 60110 `User account changed`.
 - Security EID 4722 `A user account was enabled` — Target `backdoor`,
-  Subject `ctum`.
+  Subject set to the operator account.
 - Supporting: 92039 (net.exe execution) / 92033 (PowerShell discovery)
   observed alongside.
 - Custom Wazuh rule 100002 `Detection Platform: Local user account created (4720)

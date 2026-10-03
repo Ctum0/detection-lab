@@ -22,9 +22,9 @@ Security EID 4720 with `TargetUserName`, `TargetDomainName` (host), and `Subject
 Run `net user labtest P@ssw0rd! /add` on the victim; confirm 4720 ships and the rule fires, with `SubjectUserName` matching the operator.
 
 Validated 2026-09-27: ran `net user backdoor P@ssw0rd123 /add` on
-windows-victim (`DESKTOP-2R9UM3Q`) — command completed successfully, and
+windows-victim — command completed successfully, and
 Wazuh fired 60109 `User account enabled or created` plus EID 4722
-`A user account was enabled` (Target `backdoor`, Subject `ctum`).
+`A user account was enabled` (Target `backdoor`, Subject set to the operator account).
 Evidence: `evidence/det005-net-user-backdoor.png`,
 `evidence/det005-user-created-alerts.png`,
 `evidence/det005-eid4722-drilldown.png`.

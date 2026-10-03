@@ -1,35 +1,35 @@
-# VM & Asset Inventory
+# VM and asset inventory
 
-## Virtual Machines (Proxmox)
+## Virtual machines (Proxmox)
 
-| VMID | Name | Role | OS | vCPU | RAM | Disk | IP (LAN) | Tailscale | Agent |
-|---|---|---|---|---|---|---|---|---|---|
-| 100 | linux-victim | Linux victim | Ubuntu 22.04.5 | 2 | 2GB | 32GB | 192.168.1.112 | 100.109.150.66 | Wazuh |
-| 101 | windows-victim | Windows victim | Windows 10 Pro | 2 | 4GB | 32GB | 192.168.1.113 | 100.116.117.32 | Wazuh + Sysmon |
-| 8000 | ubuntu-cloud | cloud-init template | Ubuntu | 2 | 2GB | 10GB | - | - | none |
+| VMID | Name | Role | OS | vCPU | RAM | Disk | Agent |
+|---|---|---|---|---|---|---|---|
+| 100 | linux-victim | Linux victim | Ubuntu 22.04.5 | 2 | 2 GB | 32 GB | Wazuh |
+| 101 | windows-victim | Windows victim | Windows 10 Pro | 2 | 4 GB | 32 GB | Wazuh + Sysmon |
+| 8000 | ubuntu-cloud | Cloud-init template | Ubuntu | 2 | 2 GB | 10 GB | none |
 
 ## Physical
 
-| Asset | Role | Tailscale |
-|---|---|---|
-| Proxmox host (4c/16GB) | Hypervisor | 100.76.100.37 |
-| Parrot laptop | Attacker / analyst workbench | on tailnet |
+| Asset | Role |
+|---|---|
+| Proxmox host (4 vCPU, 16 GB) | Hypervisor |
+| Analyst laptop | Attacker and analyst workstation |
 
-## VPS (vmi3486973)
+## VPS
 
 | Service | Detail |
 |---|---|
-| Wazuh 4.14.8 | docker single-node (manager/indexer/dashboard), ports 1514/1515 on 0.0.0.0 |
-| Splunk | secondary SIEM / hunting |
-| Grafana | metrics |
-| Tailscale | 100.81.241.62 |
+| Wazuh 4.14.8 | docker single-node (manager, indexer, dashboard) |
+| n8n | SOAR workflow engine |
+| Splunk | Secondary SIEM and hunting |
+| Grafana | Metrics |
 
-## Planned (later phases)
+## Planned
 
 | Asset | Purpose | Phase |
 |---|---|---|
-| dc-01 | Active Directory DC | Adversary Emulation (AD) |
-| win-member-01 | Domain member | Adversary Emulation (AD) |
-| sensor | Suricata / network telemetry | TBD |
-| honeypot | Cowrie/T-Pot | TI feedback loop |
-| TheHive / MISP / OpenCTI | Case mgmt + TIP | SOAR / TI |
+| dc-01 | Active Directory domain controller | Adversary Emulation, AD phase (planned) |
+| win-member-01 | Domain member | Adversary Emulation, AD phase (planned) |
+| sensor | Suricata network telemetry | Not yet scoped |
+| honeypot | Cowrie / T-Pot | Threat Intelligence |
+| TheHive / MISP / OpenCTI | Case management and threat-intel platform | SOAR / Threat Intelligence |

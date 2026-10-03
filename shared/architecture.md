@@ -2,59 +2,52 @@
 
 ## Overview
 
-This is an end-to-end detection engineering and security operations
-platform. Attacks are executed in a controlled lab, telemetry flows into
-a dual-SIEM stack, detections are managed as code, and investigations are
-augmented by automation and AI with human-approved response.
+An end-to-end detection engineering and security operations platform.
+Attacks are run in an isolated lab, telemetry flows into a dual-SIEM stack,
+detections are managed as code, and investigations are supported by
+automation and AI. Every response action stays with a human analyst.
 
-## Data Flow
+## Data flow
 
 ```
-Attack (Parrot / Atomic Red Team)
+Attack (Parrot OS / Atomic Red Team)
   |
   v
-Victims (Win10 + Sysmon, Ubuntu + auditd)     [Proxmox VMs]
+Victims (Windows 10 + Sysmon, Ubuntu + auditd)     [Proxmox VMs]
   |
   v
-Wazuh agents (TLS, port 1514)
+Wazuh agents (TLS)
   |
   v
-Wazuh Manager (VPS, docker single-node)  -->  Wazuh Indexer + Dashboard
+Wazuh manager (VPS, docker single-node)  -->  Wazuh indexer + dashboard
   |                        |
   |                        +--> (planned) Splunk forwarding
   v
-Detections (built-in + custom Sigma/Wazuh rules)
+Detections (built-in + custom Sigma-derived Wazuh rules)
   |
   v
-Alerts -> Investigation (Threat Hunting)
+Alerts -> investigation (Threat Hunting)
   |
   v
-(planned) SOAR: enrichment -> AI summary -> case mgmt -> human decision
+SOAR: n8n enrichment -> AI triage -> Telegram -> human decision
 ```
 
 ## Network
 
-| Segment | Subnet | Notes |
-|---|---|---|
-| Home LAN (vmbr0) | 192.168.1.0/24 | Proxmox + victim VMs (deliberate choice: simplicity) |
-| Tailscale overlay | 100.x.x.x | Remote admin + telemetry transport |
-| (reserved) isolated lab net | vmbr1 192.168.57.0/24 | Available if isolation is needed later |
-
-## Remote Access
-
-- Parrot laptop <-> all nodes via Tailscale (attacker access + admin)
-- Wazuh agents reach manager over tailnet IP 100.81.241.62
-- No SIEM ports exposed publicly
+The lab runs on a private network. Victims and the hypervisor sit on a
+home LAN, and remote administration and telemetry traverse a private
+overlay network. Addresses are not published here.
 
 ## Components
 
-| Component | Tech | Host |
+| Component | Technology | Host |
 |---|---|---|
-| Hypervisor | Proxmox VE | baremetal, 4c/16GB |
-| Linux victim | Ubuntu 22.04 + auditd + Wazuh agent | VM 100 |
-| Windows victim | Win10 Pro + Sysmon (SwiftOnSecurity config) + Wazuh agent | VM 101 |
+| Hypervisor | Proxmox VE | Bare-metal server |
+| Linux victim | Ubuntu 22.04 + auditd + Wazuh agent | VM |
+| Windows victim | Windows 10 Pro + Sysmon (SwiftOnSecurity config) + Wazuh agent | VM |
 | SIEM | Wazuh 4.14.8 (docker single-node) | VPS |
-| SIEM (secondary) | Splunk | VPS |
+| Secondary SIEM | Splunk | VPS |
 | Metrics | Grafana | VPS |
-| Attacker | Parrot OS baremetal | laptop |
-| Detection repo | GitHub, detection-as-code | cloud |
+| SOAR | n8n (workflow automation) | VPS |
+| Attacker | Parrot OS | Analyst laptop |
+| Detection repository | GitHub | Cloud |
