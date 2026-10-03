@@ -29,6 +29,23 @@ fell to zero. Verified live: PowerShell launches produce no alert, while rule
 
 *Observation-based, not queried from the indexer.*
 
+## Post-deploy verification
+
+Both rules were checked on the manager after the deploy:
+
+- `GET /rules` reports rule 100013 (level 0, enabled, `local_rules.xml`) and
+  rule 100020 (level 0, enabled, `local_rules.xml`).
+- The API lists each `local_rules.xml` rule twice, giving 28 entries for 14
+  unique rules. This is a listing quirk of the 4.14.8 API for custom rule
+  files. The container has one rules file, `wazuh-analysisd -t` reports no
+  duplicate-rule warnings, and built-in rules show a single count. Behavioural
+  evidence also confirms each rule loads once (see below).
+- Encoded-PowerShell test: exactly one alert for rule 100005 (`firedtimes: 1`),
+  and zero 92213 alerts.
+
+The repository, the live manager and this document now describe the same rule
+set.
+
 ## Rule 100013: LSASS access from the LSM path
 
 **Stock rule:** 92900, which fires when a process reads LSASS memory. It
