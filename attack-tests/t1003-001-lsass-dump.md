@@ -51,12 +51,9 @@ or `rundll32` invocation.
 
 ## Evidence
 
-**Gap:** no screenshot of rule 100003 firing has been captured yet —
-checked both `~/Pictures/Screenshots/` and `~/Pictures/Screenshots/Flagship2/`
-and neither contains a `rule.id:100003` hit. Only the earlier stock-92900
-FP-case screenshot (`shared/evidence/det004-lsass-92900-svchost.png`)
-exists. Capturing `det004-comsvcs-attack.png` / `det004-rule100003-alert.png`
-is a priority gap — see `shared/evidence-index.md`.
+**Not yet captured:** a screenshot of rule 100003 firing. The earlier
+stock-92900 FP-case screenshot is on file (`shared/evidence/det004-lsass-92900-svchost.png`).
+The planned captures are listed in `shared/evidence-index.md`.
 
 ## Notes
 

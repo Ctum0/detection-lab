@@ -120,7 +120,7 @@ UNTESTED — BLOCKED, not VALIDATED. They are not claimed to work.
 
 ---
 
-## L-002: built-in rule 92213 fires on PowerShell policy-test artefacts (PENDING)
+## L-002: built-in rule 92213 fires on PowerShell policy-test artefacts (open)
 
 PowerShell writes `__PSScriptPolicyTest_*.ps1` files into the user's Temp
 directory on every session start. Wazuh's built-in Temp-drop rule (92213,
@@ -130,17 +130,17 @@ on each one. The result is hundreds of alerts per day that carry no signal.
 **Fix identified:** exclude `__PSScriptPolicyTest` in the rule, or downlevel
 `.ps1` files written to Temp to level 3. Either change is a rule edit.
 
-**Status:** pending. Deploying it needs a manager restart, and that restart
-is held for approval. The rule is not changed on the live manager yet.
+**Status:** open. The fix is identified but not yet applied. It needs a
+manager restart to take effect.
 
 ---
 
-## L-003: stray `local_rules.xml.bak` in the rules directory (PENDING)
+## L-003: stray `local_rules.xml.bak` in the rules directory (open)
 
 A backup file `local_rules.xml.bak` sits inside `/var/ossec/etc/rules/`.
 `analysisd` loads every XML file in that directory, so the backup can
 redefine custom rules alongside the live file. This is the same class of
 problem as the duplicate-rule-ID bug in the pipeline demo.
 
-**Status:** pending removal. Moving the file out is safe, but it takes
-effect only after a manager restart, which is held for approval.
+**Status:** open. Moving the file out is safe. It takes effect after a
+manager restart.

@@ -51,8 +51,8 @@ Full platform architecture (network, hosts, remote access) is in
 | Module | Focus | Status |
 |---|---|---|
 | [Detection Pipeline](modules/detection-pipeline/README.md) | Sigma→CI/CD→Wazuh, 12 rules, 9 validated | ✅ Complete |
-| [Adversary Emulation](modules/adversary-emulation/README.md) | ART campaign, purple-team loop; AD domain phase | 🔨 Workstream 1 complete · AD phase ⏸ shelved until after showcase |
-| [Cloud & Identity Security](modules/cloud-identity/README.md) | Entra ID / AWS monitoring, IaC scanning | ⏸ Shelved until after showcase |
+| [Adversary Emulation](modules/adversary-emulation/README.md) | ART campaign, purple-team loop; AD domain phase (planned) | 🔨 Workstream 1 complete · AD phase planned |
+| [Cloud & Identity Security](modules/cloud-identity/README.md) | Entra ID / AWS monitoring, IaC scanning | 🗓 Planned |
 | [SOAR & Automated Response](modules/soar/README.md) | Wazuh alerts → n8n pipeline → enrichment → AI triage → Telegram, human-in-the-loop | ✅ Complete |
 | [Threat Intelligence](modules/threat-intel/README.md) | Honeypots (Cowrie/T-Pot), MISP/OpenCTI, IOC feedback into Detection Pipeline | ⬜ Not started |
 

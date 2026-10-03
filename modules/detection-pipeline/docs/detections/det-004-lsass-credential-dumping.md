@@ -36,14 +36,9 @@ LSASS handle across two distinct access events for this technique).
 Confirmed the firing process was the planned ART test, not unexpected
 activity.
 
-**Evidence gap:** no screenshot of custom rule 100003 firing exists yet in
-`shared/evidence/` — checked both source screenshot folders and neither
-contains a `rule.id:100003` hit, despite the campaign log recording it
-fired twice. Only the earlier stock-92900 FP-case screenshot
-(`shared/evidence/det004-lsass-92900-svchost.png`) is captured. Status is
-kept VALIDATED on the strength of the campaign-log record, but capturing
-`det004-comsvcs-attack.png` / `det004-rule100003-alert.png` is a
-priority gap — see `shared/evidence-index.md`.
+**Not yet captured:** a screenshot of rule 100003 firing. The earlier
+stock-92900 FP-case screenshot is on file. Planned captures are listed in
+`shared/evidence-index.md`.
 
 ## FP notes
 
