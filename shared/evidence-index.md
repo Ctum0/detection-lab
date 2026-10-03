@@ -80,16 +80,16 @@ detection. The end-to-end CI/CD demo (DET-012) lives separately in
 | `evidence/det011-wevtutil-attack.png` | `Flagship2/Screenshot_20260927_182528.png` | Admin PowerShell on windows-victim: Atomic Red Team test **T1685.005-4 "BlackCat Ransomware Full Log Clear"** looping `wevtutil.exe cl "<log>"` across dozens of event-log channels (including Security), ending `Failed to clear log Microsoft-Windows-LiveId/Analytic ... Access is denied. Exit code: -1. Done executing test: T1685.005-4 BlackCat Ransomware Full Log Clear` | Attack view — confirms this ran as an ART atomic test, not a bare manual `wevtutil cl Security` |
 | `evidence/det011-rule100007-alert.png` | `Flagship2/DET-011.png` | Threat Hunting, `rule.id:100007`, 1 hit on windows-victim: `Detection Platform: Windows Security event log cleared (1102) [T1685.005]`, level 10, 2026-09-27 18:22:44 — fired after the `if_sid 63103` parent fix | SIEM view |
 
-## Module 4 — SOAR triage pipeline (PENDING capture)
+## Module 4 — SOAR triage pipeline (captured)
 
-Files are not yet in `shared/evidence/`. Each row lists the status honestly
-so this section is not mistaken for captured evidence.
+Files are in `shared/evidence/`. Status reflects what is actually in the folder.
 
 | Suggested file | Status | Shows |
 |---|---|---|
-| `evidence/telegram-alert-triage.png` | Pending — not yet in folder | Formatted Telegram alert with AI triage sections (WHAT HAPPENED / TECHNIQUE / SEVERITY / NEXT STEPS / FP LIKELIHOOD) |
-| `evidence/n8n-workflow-canvas.png` | Pending — not yet in folder | The 9-node SOC Alert Triage workflow on the n8n canvas |
-| `evidence/n8n-execution-success.png` | Pending — not yet in folder | A successful execution record, one run, end to end |
+| `evidence/telegram-alert-triage.png` | Captured | Telegram alert for rule 100005 (level 10, windows-victim) with AI triage sections |
+| `evidence/telegram-alert-triage-92213.png` | Captured | Telegram alert for built-in rule 92213 (level 15, windows-victim), a second detection from the same host |
+| `evidence/n8n-workflow-canvas.png` | Captured | The 9-node SOC Alert Triage workflow on the n8n canvas |
+| `evidence/n8n-execution-success.png` | Captured | A successful execution record, one run, end to end |
 
 ## Supporting (no DET yet)
 

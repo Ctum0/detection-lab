@@ -57,7 +57,7 @@ POST /webhook/wazuh-alerts  (n8n)
 | # | Node | Type | What it does | Why it is built this way |
 |---|---|---|---|---|
 | 1 | Wazuh Alert Webhook | Webhook (POST, path `wazuh-alerts`) | Receives the alert JSON from the Wazuh integration. | Single entry point; the path is the only Wazuh-side coupling. |
-| 2 | Severity Filter | Filter | Passes items where `body.severity >= 3`. **Note:** the Wazuh integration already gates on level 8, so this node is a second, looser check on a different field. See the open items below. | Keeps empty or non-alert input out of the LLM budget. |
+| 2 | Severity Filter | Filter | Passes items where `body.severity >= 3`. `body.severity` is Shuffle's own category, not the Wazuh level: a level-15 alert carries `severity: 3`. The Wazuh integration gates on level 8 upstream. See the open items below. | Keeps empty or non-alert input out of the LLM budget. |
 | 3 | Parse Alert | Code | Flattens the Shuffle payload into named fields and computes `dedup_key`. | Shuffle nests fields under `body.all_fields`, not `body.rule`. Parsing in one place means downstream nodes never care about the wrapper. |
 | 4 | Dedup (2min) | Remove Duplicates (`removeItemsSeenInPreviousExecutions`) | Drops items whose `dedup_key` was seen in a previous execution (history 5000). The node name says "2min", but the window is set by the minute-bucketed key, not a timer; the name is misleading and should be renamed. | Database-backed and atomic, so concurrent executions cannot both pass. `dedup_key` is `rule_id` plus a minute-bucketed timestamp: a Wazuh double-post within the same minute collapses, a new attack minutes later fires again. |
 | 5 | AbuseIPDB Enrichment | HTTP Request | Looks up `src_ip` reputation over the last 90 days. `neverError` is set so an API failure still produces a triage. | Enrichment is advisory; it must not block the pipeline. |
@@ -129,12 +129,13 @@ SOAR-specific lessons are in
 
 ## Open items before publishing
 
-- **Severity threshold mismatch.** The brief calls for level ≥ 8. The live
-  Severity Filter checks `body.severity >= 3`, and `severity` is not the field
-  Parse Alert reads (it uses `rule.level`). Either the filter is a no-op, or
-  it depends on a field the payload may not carry. Needs a decision and a
-  test with a real level-3 and a real level-8 alert before the README claims
-  a threshold.
+- **Severity threshold.** The brief calls for level ≥ 8. The live filter
+  checks `body.severity >= 3`, which is Shuffle's category, not the Wazuh
+  level. Checked against a real execution: a level-15 alert arrived with
+  `body.severity = 3`. Changing the filter to `body.severity >= 8` would drop
+  every alert. The correct check is `body.all_fields.rule.level >= 8`, which
+  reads the same value Parse Alert uses. Not yet applied to the live workflow;
+  awaiting confirmation.
 - **Node naming.** `Dedup (2min)` should be renamed to match its real
   behaviour.
 
