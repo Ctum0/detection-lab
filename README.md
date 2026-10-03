@@ -51,9 +51,9 @@ Full platform architecture (network, hosts, remote access) is in
 | Module | Focus | Status |
 |---|---|---|
 | [Detection Pipeline](modules/detection-pipeline/README.md) | Sigma→CI/CD→Wazuh, 12 rules, 9 validated | ✅ Complete |
-| [Adversary Emulation](modules/adversary-emulation/README.md) | ART campaign, AD domain (planned), purple-team loop | 🔨 Workstream 1 complete |
-| [Cloud & Identity Security](modules/cloud-identity/README.md) | Entra ID / AWS monitoring, IaC scanning | ⬜ Not started |
-| [SOAR & Automated Response](modules/soar/README.md) | Enrichment, AI-assisted triage, human-approved response | ⬜ Not started |
+| [Adversary Emulation](modules/adversary-emulation/README.md) | ART campaign, purple-team loop; AD domain phase | 🔨 Workstream 1 complete · AD phase ⏸ shelved until after showcase |
+| [Cloud & Identity Security](modules/cloud-identity/README.md) | Entra ID / AWS monitoring, IaC scanning | ⏸ Shelved until after showcase |
+| [SOAR & Automated Response](modules/soar/README.md) | Wazuh alerts → n8n pipeline → enrichment → AI triage → Telegram, human-in-the-loop | ✅ Complete |
 | [Threat Intelligence](modules/threat-intel/README.md) | Honeypots (Cowrie/T-Pot), MISP/OpenCTI, IOC feedback into Detection Pipeline | ⬜ Not started |
 
 The Detection Pipeline module's 9/12 is the actual current count — see
@@ -131,6 +131,9 @@ way Detection Pipeline and Adversary Emulation already do.
 - **Sigma rules:** 12 files (spec v2.1, `sigma check` clean)
 - **Wazuh rules:** 12 custom rules, IDs 100001–100012
 - **Splunk SPL:** 11 auto-generated searches (DET-010 excluded)
+- **SOAR pipeline:** 9 n8n nodes, Wazuh alert to Telegram in roughly 2–3
+  minutes (most of it the AI step), with cross-execution deduplication via
+  the Remove Duplicates node. Module doc: `modules/soar/README.md`.
 - **Evidence:** indexed in `shared/evidence-index.md`, files in
   `shared/evidence/`
 

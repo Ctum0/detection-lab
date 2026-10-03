@@ -125,3 +125,31 @@ found in detail.
   debugging time on a first install. See
   `../modules/adversary-emulation/docs/campaign-log.md` ("The ART
   install saga").
+
+## SOAR build lessons (Module 4)
+
+- **n8n: multiple inbound connections mean one execution per branch, not an
+  input merge.** A node with two incoming wires runs once for each. In this
+  build that duplicated every downstream side effect, including the Telegram
+  send. Fix by making the join a run-once node that reads its other inputs
+  explicitly. See [war story §7](../modules/soar/docs/war-story.md).
+- **n8n: in-memory `staticData` has no atomicity.** Two executions arriving
+  in the same millisecond both pass a check. Use the database-backed Remove
+  Duplicates node for cross-execution dedup.
+- **Remove Duplicates "Value Is New" remembers forever.** For a rate window,
+  bucket the key, for example `rule_id` plus the minute. Otherwise the first
+  alert for a rule silently blocks every later one.
+- **Wazuh integrations need a matching script or a native name.** A
+  `custom-*` integration without a script in `/var/ossec/integrations/` is
+  skipped without an error. Native names such as `shuffle`, `slack` and
+  `pagerduty` avoid this.
+- **Container config lives on the volume.** In single-node docker, edits to
+  the host bind-mount do not reach the running manager. Confirm which file
+  the process reads before checking the contents.
+- **"Tiny test prompt works" is not "production prompt works".** A health
+  check with a short input passed for a model that hung on the real triage
+  prompt. Test with production-sized inputs, and set explicit timeouts on
+  every model call, because a model can hang rather than fail.
+- **Synthetic tests can pass for the wrong reason.** The double-send only
+  appeared when every input branch delivered data, which synthetic payloads
+  never did. Test end to end with real attacks.
