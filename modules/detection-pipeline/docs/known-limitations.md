@@ -1,6 +1,6 @@
 # Known limitations
 
-## L-001: auditd EXECVE telemetry not reaching Wazuh (open)
+## L-001: auditd EXECVE telemetry not reaching Wazuh (WONTFIX — abandoned)
 
 Blocks validation of DET-008 (SUID, rule 100010) and DET-009 (reverse
 shell, rule 100001). Both rules exist in Sigma, Wazuh XML and SPL, but no
@@ -87,28 +87,60 @@ all along. The actual fault is that `auditd` died on `linux-victim` on
 2026-09-26 20:50 UTC and systemd's restart rate-limiter plus the
 lingering `kauditd` thread are preventing a clean in-place recovery.
 
-### Resolution
+### Resolution attempted: reboot (did not resolve)
 
-**Fix: reboot `linux-victim`.** A full VM reboot clears the rate-limit
-counter and cleanly reinitializes both `kauditd` and `auditd` — no config
-changes are needed since the audit rule (`audit-wazuh-c`) and the agent's
-`<localfile>` block were already correct. Not yet executed as of this
-writeup.
+A full reboot of `linux-victim` was performed to clear the rate-limit
+counter and reinitialise `kauditd`/`auditd`. The audit rule
+(`audit-wazuh-c`) and the agent's `<localfile>` block were already
+correct, so no config change was involved. The retry did not restore a
+working audit pipeline.
 
-### Workaround options (if the reboot doesn't fully resolve it)
+### Decision: abandoned
 
-1. **Short term:** validate DET-008/009 logic off-box — run the Sigma→SPL
-   queries manually in Splunk against imported `ausearch` output, and
-   record results in the det docs without flipping to VALIDATED.
-2. **Alternative:** rewrite rules 100001/100010 against `full_log` PCRE2
-   `<match>` (decoder-independent) if decoded fields prove unreliable —
-   the converter already supports this pattern for sshd. Given the root
-   cause is now known to be the daemon being dead rather than a decoding
-   mismatch, this is unlikely to be needed.
+L-001 is closed as **WONTFIX**. The reasoning, stated plainly:
+
+- The remaining work (reinstalling or rebuilding the audit path, then
+  re-validating two Linux rules) was judged to cost more time than it adds
+  for this lab. Windows and SSH telemetry, which carry most of the detection
+  value, were already validated.
+- Execve telemetry is still captured on the host itself, and `ausearch`
+  shows it, so the activity is not invisible. It just does not reach
+  Wazuh.
+- The question will be revisited only as part of a fresh VM rebuild, not as
+  a standalone repair.
+
+**Current status of DET-008 and DET-009:** the rules (100010, 100001) stay
+deployed in `custom_rules.xml`, unvalidated. The matrix marks them
+UNTESTED — BLOCKED, not VALIDATED. They are not claimed to work.
 
 ### Next steps
 
-- [ ] Reboot `linux-victim` (Sithum)
-- [ ] Confirm `auditd`/`kauditd` are running clean post-reboot (`systemctl status auditd`, `ps` for `kauditd`)
-- [ ] Re-run DET-008/DET-009 validation attacks (100001, 100010) once auditd is confirmed healthy (Sithum)
-- [ ] Flip matrix + det-doc statuses to VALIDATED with evidence filenames
+- [x] Reboot `linux-victim` — done, did not resolve
+- [ ] Revisit only during a fresh VM rebuild (no separate task planned)
+
+---
+
+## L-002: built-in rule 92213 fires on PowerShell policy-test artefacts (PENDING)
+
+PowerShell writes `__PSScriptPolicyTest_*.ps1` files into the user's Temp
+directory on every session start. Wazuh's built-in Temp-drop rule (92213,
+"Executable dropped in Windows root folder" / script-in-Temp variant) fires
+on each one. The result is hundreds of alerts per day that carry no signal.
+
+**Fix identified:** exclude `__PSScriptPolicyTest` in the rule, or downlevel
+`.ps1` files written to Temp to level 3. Either change is a rule edit.
+
+**Status:** pending. Deploying it needs a manager restart, and that restart
+is held for approval. The rule is not changed on the live manager yet.
+
+---
+
+## L-003: stray `local_rules.xml.bak` in the rules directory (PENDING)
+
+A backup file `local_rules.xml.bak` sits inside `/var/ossec/etc/rules/`.
+`analysisd` loads every XML file in that directory, so the backup can
+redefine custom rules alongside the live file. This is the same class of
+problem as the duplicate-rule-ID bug in the pipeline demo.
+
+**Status:** pending removal. Moving the file out is safe, but it takes
+effect only after a manager restart, which is held for approval.

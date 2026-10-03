@@ -1,6 +1,6 @@
 # Cloud & Identity Security
 
-**Status: NOT STARTED**
+**Status: SHELVED — until after the showcase.** Not started; scope below is planned, not in progress.
 
 ## Planned scope
 

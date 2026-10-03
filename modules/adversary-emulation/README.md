@@ -1,7 +1,7 @@
 # Adversary Emulation & AD Lab
 
-**Status: Workstream 1 (Windows campaign) COMPLETE**; Workstreams 2-4 not
-started.
+**Status: Workstream 1 (Windows campaign) COMPLETE.** The AD phase (W3) is
+shelved until after the showcase; W2 and W4 are not started.
 
 Adversary emulation against the lab's Windows and Linux victims — Atomic
 Red Team-driven attack execution that validates the detections built in
@@ -15,7 +15,7 @@ writeup here.
 |---|---|---|
 | W1 — Windows campaign | ART-driven validation of the Windows-side custom Wazuh rules (T1136.001, T1003.001, T1059.001, T1053.005, T1685.005, T1543.003) plus the existing SSH brute-force test | **COMPLETE** — see `docs/campaign-log.md` |
 | W2 — Linux campaign | auditd-backed techniques (T1548.001, T1059.004) — currently blocked by the auditd ingestion gap, `../detection-pipeline/docs/known-limitations.md` L-001 | NOT STARTED |
-| W3 — Active Directory | Domain-joined attack paths once `dc-01`/`win-member-01` are stood up (see `shared/vm-inventory.md`) | NOT STARTED |
+| W3 — Active Directory | Domain-joined attack paths once `dc-01`/`win-member-01` are stood up (see `shared/vm-inventory.md`) | SHELVED — post-showcase |
 | W4 — Multi-stage campaigns | Chained TTPs across the kill chain, not single-technique tests | NOT STARTED |
 
 ## Layout

@@ -82,8 +82,8 @@ step necessary, are in `../../platform/workflows-docs.md`.
 | DET-005 | T1136.001 Local Account | 100002 | VALIDATED |
 | DET-006 | T1053.005 Scheduled Task | 100006 | VALIDATED |
 | DET-007 | T1543.003 Windows Service | 100011 | VALIDATED |
-| DET-008 | T1548.001 Setuid and Setgid | 100010 | UNTESTED — auditd gap |
-| DET-009 | T1059.004 Unix Shell | 100001 | UNTESTED — auditd gap |
+| DET-008 | T1548.001 Setuid and Setgid | 100010 | UNTESTED — blocked, L-001 abandoned |
+| DET-009 | T1059.004 Unix Shell | 100001 | UNTESTED — blocked, L-001 abandoned |
 | DET-010 | T1110.001 Password Guessing (temporal) | — (manual only) | UNTESTED — out of scope |
 | DET-011 | T1685.005 Clear Windows Event Logs | 100007 | VALIDATED |
 | DET-012 | T1098 (CI/CD canary) | 100012 | VALIDATED |
